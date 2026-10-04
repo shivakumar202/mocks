@@ -1,0 +1,927 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>SSC Practice Desk</title>
+<style>
+/* Layout: one narrow exam-sheet column; OMR-style answer bubbles and a CBT question palette carry the identity. */
+:root{
+  --bg:#f3f5fa; --surface:#ffffff; --ink:#14213d; --muted:#586179; --line:#d6dbe8;
+  --accent:#b3125e; --accent-soft:#fbe3ee; --on-accent:#ffffff;
+  --good:#12703f; --good-soft:#dff3e8; --bad:#b8232a; --bad-soft:#fbe2e3;
+  --warn:#8f5600; --warn-soft:#fbeed3; --review:#5b34b8; --review-soft:#ebe4fb;
+  --display:"Avenir Next Condensed","Roboto Condensed","Bahnschrift","sans-serif-condensed","Arial Narrow",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  --mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e131f; --surface:#171f30; --ink:#e9ecf5; --muted:#9ba6bc; --line:#2c3752;
+  --accent:#ff74b1; --accent-soft:#3b1a2c; --on-accent:#2a0716;
+  --good:#56d394; --good-soft:#12301f; --bad:#ff8585; --bad-soft:#3a1a1c;
+  --warn:#f2b75a; --warn-soft:#33270f; --review:#b79cff; --review-soft:#261d42; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0e131f; --surface:#171f30; --ink:#e9ecf5; --muted:#9ba6bc; --line:#2c3752;
+  --accent:#ff74b1; --accent-soft:#3b1a2c; --on-accent:#2a0716;
+  --good:#56d394; --good-soft:#12301f; --bad:#ff8585; --bad-soft:#3a1a1c;
+  --warn:#f2b75a; --warn-soft:#33270f; --review:#b79cff; --review-soft:#261d42; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 48px;display:flex;flex-direction:column;gap:20px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:2px solid var(--ink);padding-block:10px 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 18px}
+.brand{font:700 22px/1 var(--display);letter-spacing:.02em;text-transform:uppercase;padding-bottom:10px}
+.brand i{font-style:normal;color:var(--accent)}
+nav{display:flex;gap:2px;margin-left:auto}
+nav button{font:600 14px var(--body);background:none;border:0;color:var(--muted);padding:8px 12px;border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px}
+nav button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+h1{font:700 30px/1.1 var(--display);margin:0;text-wrap:balance}
+h2{font:700 20px/1.2 var(--display);margin:0;text-transform:uppercase;letter-spacing:.03em}
+h3{font:600 16px/1.3 var(--body);margin:0}
+p{margin:0}
+.muted{color:var(--muted);font-size:14px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{font:600 14px var(--body);border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:6px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.quiet{border-color:var(--line);color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.intro{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.sub-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.sub-head .sp{margin-left:auto}
+.topics{display:flex;flex-direction:column}
+.topic{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.topic .nm{flex:1 1 180px;min-width:0}
+.chip{font:600 11px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.chip.good{background:var(--good-soft);color:var(--good)} .chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.new{background:var(--line);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:2px solid var(--ink);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.bar .ttl{font:700 16px var(--display);text-transform:uppercase;letter-spacing:.03em;flex:1 1 150px;min-width:0}
+.clock{font:700 18px var(--mono);font-variant-numeric:tabular-nums}
+.clock.low{color:var(--bad)}
+.qtext{font-size:18px;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;font:500 16px var(--body);background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;width:100%}
+.opt .bub{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:700 13px var(--mono)}
+.opt.sel{border-color:var(--accent)} .opt.sel .bub{background:var(--accent);color:var(--on-accent)}
+.opt.ok{border-color:var(--good);background:var(--good-soft)} .opt.ok .bub{background:var(--good);border-color:var(--good);color:var(--surface)}
+.opt.no{border-color:var(--bad);background:var(--bad-soft)} .opt.no .bub{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.opt:disabled{cursor:default;opacity:1}
+.fb{border-left:4px solid var(--good);background:var(--good-soft);padding:10px 12px;border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:6px}
+.fb.no{border-color:var(--bad);background:var(--bad-soft)}
+.fb b{font-weight:700}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:6px}
+.pal button{font:600 12px var(--mono);height:32px;border-radius:5px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.pal .ans{background:var(--good);border-color:var(--good);color:var(--surface)}
+.pal .mk{background:var(--review);border-color:var(--review);color:var(--surface)}
+.pal .cur{outline:2px solid var(--ink);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;background:var(--line)}
+.legend .a::before{background:var(--good)} .legend .m::before{background:var(--review)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.tile{border-top:3px solid var(--ink);padding-top:8px}
+.tile .v{font:700 30px/1.1 var(--display)} .tile .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;flex:1 1 120px;min-width:80px}
+.meter i{display:block;height:100%;background:var(--accent)}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:6px 0}
+.srow .lb{flex:0 0 150px} .srow .pc{flex:0 0 48px;text-align:right}
+svg.chart{width:100%;height:auto;display:block}
+.chart .grid{stroke:var(--line);stroke-width:1} .chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5} .chart .ar{fill:var(--accent-soft);stroke:none}
+.chart .pt{fill:var(--surface);stroke:var(--accent);stroke-width:2} .chart .last{fill:var(--accent);stroke:var(--accent)}
+details.rv{border-bottom:1px dashed var(--line);padding:8px 0}
+details.rv summary{cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+details.rv .in{display:flex;flex-direction:column;gap:10px;padding-top:10px}
+.ov{position:fixed;inset:0;background:rgba(10,14,24,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:env(safe-area-inset-top,0px) 0 0}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:14px 14px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;border-top:4px solid var(--accent)}
+.sheet ol,.sheet ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.step{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.solve{background:var(--accent-soft);padding:12px;border-radius:6px}
+.hist{display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hist .l{flex:1 1 180px;min-width:0}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:520px){ h1{font-size:25px} nav{margin-left:0;width:100%} nav button{flex:1;padding-inline:4px} .srow .lb{flex-basis:100%} }
+@media (prefers-reduced-motion:no-preference){ .meter i{transition:width .4s} }
+</style>
+
+<div class="wrap">
+  <div id="app"></div>
+  <footer>Works without internet once this page is open or saved. Your progress is stored only on this device and browser.</footer>
+</div>
+<div id="learn" hidden></div>
+
+<script>
+/* ---------- helpers ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const P=a=>a[R(0,a.length-1)];
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const gcd=(a,b)=>b?gcd(b,a%b):a, lcm=(a,b)=>a*b/gcd(a,b);
+const ord=n=>{const t=n%100;if(t>10&&t<14)return n+'th';return n+(['th','st','nd','rd'][n%10]||'th')};
+const AZ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const enc=(w,k)=>w.split('').map(c=>AZ[(AZ.indexOf(c)+k+26)%26]).join('');
+const rs=x=>'₹'+x, pc=x=>x+'%';
+function mk(q,c,wr,sol,fmt){
+  fmt=fmt||String; const set=[c];
+  for(const w of wr){ if(set.length<4&&!set.includes(w)&&(typeof w!=='number'||(isFinite(w)&&w>0))) set.push(w) }
+  let k=1;
+  while(set.length<4&&typeof c==='number'&&k<400){ const step=Math.max(1,Math.round(Math.abs(c)*0.1)); const cand=c+(k%2?1:-1)*step*Math.ceil(k/2); k++; if(cand>0&&!set.includes(cand)) set.push(cand) }
+  const o=sh(set); return {q,opts:o.map(fmt),a:o.indexOf(c),sol};
+}
+
+/* ---------- question generators (fresh numbers and words every time) ---------- */
+const WT=[];for(let a=3;a<=60;a++)for(let b=a;b<=60;b++){const t=a*b/(a+b);if(Number.isInteger(t)&&t>1)WT.push([a,b,t])}
+const WORDS=['CAT','DOG','SUN','PEN','BOOK','LAMP','RAIN','FISH','GOLD','TREE','MOON','BIRD','SHIP','ROAD','KING','MILK','HAND','STAR','BALL','CUP','DESK','FARM','GATE','HILL','JUMP','KITE','LION','MANGO','NEST','PARK','RICE','SALT','TIGER','WIND','BREAD','CHAIR','PLANT','RIVER','STONE','WATER','BAG','MAP','FAN','BED','JOB','NET','BOX','TOY'];
+const PRIMES=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71];
+const MEN=['Ravi','Arun','Vijay','Mohan','Suresh','Anil','Raju','Deepak','Sanjay','Manoj'],WOMEN=['Anu','Meena','Sita','Priya','Lata','Kavita','Rani','Geeta','Pooja','Sunita'];
+const tb=s=>s.split(';').map(r=>r.split('=').map(x=>x.trim()));
+const CUR=tb('Japan=Yen;China=Yuan;South Korea=Won;Malaysia=Ringgit;Bangladesh=Taka;Russia=Rouble;United Kingdom=Pound sterling;Thailand=Baht;Indonesia=Rupiah;Saudi Arabia=Riyal;United Arab Emirates=Dirham;Myanmar=Kyat;Bhutan=Ngultrum;South Africa=Rand;Brazil=Real;Vietnam=Dong;Turkey=Lira;USA=Dollar');
+const CAP=tb('Australia=Canberra;Canada=Ottawa;Japan=Tokyo;Nepal=Kathmandu;Bhutan=Thimphu;Bangladesh=Dhaka;Myanmar=Naypyidaw;China=Beijing;Russia=Moscow;France=Paris;Germany=Berlin;Italy=Rome;Egypt=Cairo;Brazil=Brasilia;USA=Washington D.C.;United Kingdom=London;Afghanistan=Kabul;Thailand=Bangkok;Maldives=Male;New Zealand=Wellington;Switzerland=Bern;Turkey=Ankara;Pakistan=Islamabad;Spain=Madrid');
+const SCAP=tb('Assam=Dispur;Odisha=Bhubaneswar;Kerala=Thiruvananthapuram;Karnataka=Bengaluru;Gujarat=Gandhinagar;Rajasthan=Jaipur;Madhya Pradesh=Bhopal;Bihar=Patna;Jharkhand=Ranchi;Chhattisgarh=Raipur;Uttarakhand=Dehradun;Himachal Pradesh=Shimla;Sikkim=Gangtok;Meghalaya=Shillong;Mizoram=Aizawl;Nagaland=Kohima;Manipur=Imphal;Tripura=Agartala;Arunachal Pradesh=Itanagar;Goa=Panaji;Telangana=Hyderabad;Tamil Nadu=Chennai;West Bengal=Kolkata;Uttar Pradesh=Lucknow;Maharashtra=Mumbai;Punjab=Chandigarh');
+const AT=[
+['worker and place of work',tb('Doctor=Hospital;Teacher=School;Farmer=Field;Chef=Kitchen;Pilot=Cockpit;Sailor=Ship;Judge=Court;Scientist=Laboratory;Actor=Stage;Clerk=Office;Miner=Mine;Painter=Studio')],
+['animal and its young one',tb('Lion=Cub;Cow=Calf;Dog=Puppy;Cat=Kitten;Horse=Foal;Goat=Kid;Sheep=Lamb;Hen=Chick;Duck=Duckling;Frog=Tadpole;Deer=Fawn')],
+['animal and its home',tb('Bird=Nest;Bee=Hive;Horse=Stable;Dog=Kennel;Lion=Den;Spider=Web;Cow=Shed;Rabbit=Burrow;Pig=Sty')],
+['tool and its use',tb('Pen=Write;Knife=Cut;Needle=Sew;Spade=Dig;Broom=Sweep;Axe=Chop;Scale=Measure;Brush=Paint;Hammer=Strike')],
+['animal and its sound',tb('Lion=Roar;Dog=Bark;Cat=Mew;Horse=Neigh;Snake=Hiss;Frog=Croak;Cow=Moo;Crow=Caw;Duck=Quack;Bee=Hum')],
+['country and currency',CUR],['country and capital',CAP],['state and capital',SCAP]];
+const OC=[
+['a fruit','fruits',['Apple','Mango','Banana','Grapes','Guava','Papaya','Pineapple']],
+['a vegetable','vegetables',['Potato','Carrot','Onion','Cabbage','Brinjal','Radish','Spinach']],
+['a metal','metals',['Iron','Copper','Gold','Silver','Zinc','Aluminium']],
+['a planet','planets',['Mars','Venus','Jupiter','Saturn','Neptune','Uranus']],
+['a river','rivers',['Yamuna','Godavari','Narmada','Kaveri','Brahmaputra','Mahanadi']],
+['a bird','birds',['Crow','Sparrow','Parrot','Eagle','Pigeon','Peacock']],
+['a wild animal','wild animals',['Lion','Tiger','Elephant','Deer','Bear','Wolf']],
+['an insect','insects',['Ant','Bee','Mosquito','Butterfly','Housefly','Beetle']],
+['a colour','colours',['Red','Blue','Green','Yellow','Black','White']],
+['a body organ','body organs',['Heart','Liver','Kidney','Lungs','Brain','Stomach']],
+['an Indian state','Indian states',['Kerala','Punjab','Assam','Bihar','Odisha','Gujarat']],
+['a country','countries',['Japan','China','Nepal','Brazil','France','Egypt']],
+['a musical instrument','musical instruments',['Sitar','Tabla','Flute','Violin','Guitar','Veena']],
+['a game','games',['Cricket','Hockey','Football','Tennis','Chess','Kabaddi']],
+['a flower','flowers',['Rose','Lotus','Jasmine','Lily','Marigold','Sunflower']]];
+const G={
+pct(){const v=R(0,6);
+  if(v==0){const p=P([5,10,15,20,25,30,35,40,45,60,70,75,80]),N=R(2,45)*20,a=p*N/100;
+    return mk(`What is ${p}% of ${N}?`,a,[a+N/10,a*2,Math.abs(a-N/20)],`10% of ${N} = ${N/10} (move the decimal one place left). 5% is half of that = ${N/20}. Build ${p}% from these pieces: ${p}% of ${N} = ${a}.`)}
+  if(v==1){const p=P([10,20,25,30,40,50]),N=R(2,40)*20,a=N*(100+p)/100;
+    return mk(`A price of ₹${N} is increased by ${p}%. What is the new price?`,a,[N+p,N*p/100,N*(100-p)/100],`${p}% of ${N} = ${N*p/100}. Add it: ${N} + ${N*p/100} = ₹${a}. Shortcut: multiply ${N} by ${(100+p)/100}.`,rs)}
+  if(v==2){const Y=P([20,40,60,80,120,200,300,400,500]),p=P([5,10,15,20,25,30,40,50,60,75]),X=Y*p/100;
+    return mk(`${X} is what percent of ${Y}?`,p,[p+5,p*2,100-p],`Percent = part ÷ whole × 100 = ${X} ÷ ${Y} × 100 = ${p}%.`,pc)}
+  if(v==3){const p=P([10,20,25,30,40,50]),N=R(2,40)*20,a=N*(100-p)/100;
+    return mk(`The number ${N} is decreased by ${p}%. What is the result?`,a,[N-p,N*p/100,N*(100+p)/100],`${p}% of ${N} = ${N*p/100}. Subtract it: ${N} − ${N*p/100} = ${a}. Shortcut: multiply ${N} by ${(100-p)/100}.`)}
+  if(v==4){const p=P([10,20,25,40,50]),N=R(2,40)*20,X=p*N/100;
+    return mk(`${p}% of a number is ${X}. What is the number?`,N,[X*p/10,N+X,N-X],`If ${p}% = ${X}, then 100% = ${X} × 100 ÷ ${p} = ${N}.`)}
+  if(v==5){const [a,b,p]=P([[1,2,50],[1,4,25],[3,4,75],[1,5,20],[2,5,40],[3,5,60],[4,5,80],[1,10,10],[3,10,30],[7,10,70],[1,20,5],[1,25,4],[3,20,15],[9,20,45]]);
+    return mk(`Write the fraction ${a}/${b} as a percentage.`,p,[a*10+b,100-p,p+10],`Multiply by 100: ${a}/${b} × 100 = ${p}%. Learn the common ones by heart: 1/4 = 25%, 1/5 = 20%, 1/10 = 10%.`,pc)}
+  const Y=P([40,60,80,120,200,300,400,500,600]),p=R(7,19)*5,X=Y*p/100;
+  return mk(`A student scores ${X} marks out of ${Y}. What is the percentage?`,p,[p+5,p-5,100-p],`Percentage = ${X} ÷ ${Y} × 100 = ${p}%.`,pc)},
+pl(){const v=R(0,4),C=R(1,15)*100,p=P([5,10,15,20,25,30,40,50]);
+  if(v==0){const g=R(0,1),S=C*(100+(g?p:-p))/100,d=Math.abs(S-C);
+    return mk(`An item bought for ₹${C} is sold for ₹${S}. Find the ${g?'profit':'loss'} percent.`,p,[Math.round(d*100/S),p+5,p-5],`${g?'Profit':'Loss'} = ${d}. Always divide by the cost price: ${d} ÷ ${C} × 100 = ${p}%.`,pc)}
+  if(v==1){const S=C*(100+p)/100;
+    return mk(`A shopkeeper buys an item for ₹${C} and wants a profit of ${p}%. What should the selling price be?`,S,[C+p,C*(100-p)/100,C*p/100],`Profit = ${p}% of ${C} = ${C*p/100}. SP = ${C} + ${C*p/100} = ₹${S}. Shortcut: ${C} × ${(100+p)/100}.`,rs)}
+  if(v==2){const M=R(2,25)*100,d=P([5,10,15,20,25,30,40]),S=M*(100-d)/100;
+    return mk(`The marked price of a shirt is ₹${M}. A discount of ${d}% is given. What is the selling price?`,S,[M-d,M*d/100,M*(100+d)/100],`Discount = ${d}% of ${M} = ${M*d/100}. SP = ${M} − ${M*d/100} = ₹${S}. Shortcut: ${M} × ${(100-d)/100}.`,rs)}
+  if(v==3){const S=C*(100+p)/100;
+    return mk(`By selling an item for ₹${S}, a trader gains ${p}%. What was the cost price?`,C,[S*(100-p)/100,S-p,C+C*p/100/2],`SP = CP × ${(100+p)/100}. So CP = ${S} × 100 ÷ ${100+p} = ₹${C}. Do not take ${p}% of the selling price.`,rs)}
+  const S=C*(100-p)/100;
+  return mk(`A cycle bought for ₹${C} is sold at a loss of ${p}%. What is the selling price?`,S,[C-p,C*(100+p)/100,C*p/100],`Loss = ${p}% of ${C} = ${C*p/100}. SP = ${C} − ${C*p/100} = ₹${S}. Shortcut: ${C} × ${(100-p)/100}.`,rs)},
+si(){const v=R(0,5);
+  if(v<4){const p=R(1,24)*500,r=P([3,4,5,6,8,10,12,15]),t=R(2,6),one=p*r/100,s=one*t;
+    if(v==0) return mk(`Find the simple interest on ₹${p} at ${r}% per year for ${t} years.`,s,[one,s+p,one*(t+1)],`One year's interest = ${r}% of ${p} = ${one}. For ${t} years: ${one} × ${t} = ₹${s}.`,rs);
+    if(v==1) return mk(`₹${p} is lent at ${r}% simple interest per year. What amount is returned after ${t} years?`,p+s,[s,p+one,p+s+one],`One year's interest = ${one}. For ${t} years = ${s}. Amount = principal + interest = ${p} + ${s} = ₹${p+s}.`,rs);
+    if(v==2) return mk(`The simple interest on ₹${p} for ${t} years is ₹${s}. What is the rate per year?`,r,[r+1,r+2,r*t],`One year's interest = ${s} ÷ ${t} = ${one}. Rate = ${one} ÷ ${p} × 100 = ${r}%.`,pc);
+    return mk(`₹${p} earns ₹${s} as simple interest at ${r}% per year. For how many years was it lent?`,t,[t+1,t+2,t*2],`One year's interest = ${r}% of ${p} = ${one}. Years = ${s} ÷ ${one} = ${t}.`,x=>x+' years')}
+  const p=R(1,12)*1000,r=P([10,20]),e=2*r+r*r/100,ci=p*e/100;
+  if(v==4) return mk(`Find the compound interest on ₹${p} at ${r}% per year for 2 years (compounded yearly).`,ci,[p*2*r/100,ci+p,p*r/100],`For 2 years the effective rate = 2R + R²/100 = ${2*r} + ${r*r/100} = ${e}%. CI = ${e}% of ${p} = ₹${ci}.`,rs);
+  return mk(`₹${p} is invested at ${r}% compound interest per year. What is the amount after 2 years?`,p+ci,[p+p*2*r/100,ci,p+ci+p*r/100],`Effective rate for 2 years = ${e}%. Interest = ${e}% of ${p} = ${ci}. Amount = ${p} + ${ci} = ₹${p+ci}.`,rs)},
+ratio(){const v=R(0,4),[a,b]=P([[1,2],[2,3],[3,4],[3,5],[2,5],[4,5],[1,3],[5,7],[3,7],[2,7],[4,7],[5,8],[3,8],[1,4],[5,6]]);
+  if(v==0){const u=R(2,25)*10,S=(a+b)*u,first=R(0,1);
+    return mk(`₹${S} is divided between A and B in the ratio ${a} : ${b}. What is ${first?"A":"B"}'s share?`,first?a*u:b*u,[first?b*u:a*u,S/2,u],`Total parts = ${a} + ${b} = ${a+b}. One part = ${S} ÷ ${a+b} = ${u}. ${first?'A':'B'} gets ${first?a:b} parts = ₹${(first?a:b)*u}.`,rs)}
+  if(v==1){const u=R(2,15);
+    return mk(`The ratio of boys to girls in a class is ${a} : ${b}. If there are ${a*u} boys, how many girls are there?`,b*u,[a*u,(a+b)*u,b*u+a],`Boys = ${a} parts = ${a*u}, so one part = ${u}. Girls = ${b} parts = ${b*u}.`)}
+  if(v==2){const [x,y,z]=P([[1,2,3],[2,3,5],[1,3,4],[2,3,4],[3,4,5],[1,2,2],[2,5,8],[1,4,5]]),u=R(2,15)*10,S=(x+y+z)*u;
+    return mk(`₹${S} is shared among A, B and C in the ratio ${x} : ${y} : ${z}. What is C's share?`,z*u,[x*u,y*u,u],`Total parts = ${x+y+z}. One part = ${S} ÷ ${x+y+z} = ${u}. C gets ${z} parts = ₹${z*u}.`,rs)}
+  if(v==3){const g=R(2,12);
+    return mk(`Write the ratio ${a*g} : ${b*g} in its simplest form.`,`${a} : ${b}`,[`${b} : ${a}`,`${a+1} : ${b}`,`${a} : ${b+1}`],`Divide both numbers by their HCF, which is ${g}: ${a*g} ÷ ${g} = ${a} and ${b*g} ÷ ${g} = ${b}.`)}
+  const k=R(2,12);
+  return mk(`Find x if ${a} : ${b} :: ${a*k} : x`,b*k,[a*k+b,b*k+a,a*k-a+b],`The first number became ${k} times (${a} → ${a*k}). So do the same to the second: ${b} × ${k} = ${b*k}.`)},
+avg(){const v=R(0,5);
+  if(v==0){const m=R(15,80),d=sh(P([[-6,-2,0,3,5],[-5,-3,1,2,5],[-4,-1,0,2,3],[-10,-5,0,5,10],[-7,-4,2,3,6],[-8,-1,1,3,5],[-3,-2,0,1,4]])),ns=d.map(x=>m+x),sum=m*5;
+    return mk(`Find the average of ${ns.join(', ')}.`,m,[m+1,m-1,m+2],`Sum = ${sum}. Average = ${sum} ÷ 5 = ${m}. Shortcut: guess ${m}. The differences (${d.map(x=>(x>0?'+':'')+x).join(', ')}) add up to 0, so the guess is the average.`)}
+  if(v==1){const n=R(4,12),A=R(20,60),k=R(1,5),B=A+k,X=B+n*k;
+    return mk(`The average of ${n} numbers is ${A}. When one more number is added, the average becomes ${B}. What is the new number?`,X,[B,X-k,X+n],`Old sum = ${n} × ${A} = ${n*A}. New sum = ${n+1} × ${B} = ${(n+1)*B}. New number = ${(n+1)*B} − ${n*A} = ${X}. Shortcut: new average + (old count × rise) = ${B} + ${n} × ${k} = ${X}.`)}
+  if(v==2){const m=R(4,49),n=2*m+1;
+    return mk(`What is the average of the first ${n} natural numbers?`,m+1,[m,n,m+2],`Average of the first n natural numbers = (n + 1) ÷ 2 = ${n+1} ÷ 2 = ${m+1}. It is simply the middle number.`)}
+  if(v==3){const n=R(4,25),A=R(12,60);
+    return mk(`The average of ${n} numbers is ${A}. What is their sum?`,n*A,[n+A,n*A+A,n*A-n],`Sum = average × count = ${A} × ${n} = ${n*A}.`)}
+  if(v==4){const n=R(5,12),k=R(1,4),w=R(40,70),X=w+n*k;
+    return mk(`The average weight of ${n} persons rises by ${k} kg when a person weighing ${w} kg is replaced by a new person. What is the weight of the new person?`,X,[w+k,w+n,X+k],`Total rise = ${n} × ${k} = ${n*k} kg. The new person brings all of it: ${w} + ${n*k} = ${X} kg.`,x=>x+' kg')}
+  const m=R(40,85),x=R(1,9),y=R(1,9),ns=sh([m-x,m-y,m+x+y]);
+  return mk(`A student scores ${ns[0]}, ${ns[1]} and ${ns[2]} in three tests. What is the average score?`,m,[m+1,m-1,m+3],`Sum = ${3*m}. Average = ${3*m} ÷ 3 = ${m}.`)},
+work(){const v=R(0,3),d=x=>x+' days';
+  if(v<2){let [a,b,t]=P(WT);if(R(0,1))[a,b]=[b,a];
+    if(v==0){const L=lcm(a,b);
+      return mk(`A can finish a job in ${a} days and B in ${b} days. In how many days will they finish it working together?`,t,[(a+b)/2,a+b,t+1],`Take total work = LCM of ${a} and ${b} = ${L} units. A does ${L/a} units a day, B does ${L/b}. Together = ${L/a+L/b} units a day. Days = ${L} ÷ ${L/a+L/b} = ${t}. Shortcut: (${a} × ${b}) ÷ (${a} + ${b}) = ${t}.`,d)}
+    const L=lcm(t,a),x=L/t-L/a;
+    return mk(`A and B together finish a job in ${t} days. A alone can finish it in ${a} days. In how many days can B alone finish it?`,b,[a-t,a+t,b+t],`Take total work = LCM of ${t} and ${a} = ${L} units. Together they do ${L/t} units a day. A does ${L/a}. So B does ${L/t} − ${L/a} = ${x} units a day. B alone = ${L} ÷ ${x} = ${b} days.`,d)}
+  if(v==2){const D2=R(2,12),k=P([2,3,4]),M1=R(2,12),D1=D2*k,M2=M1*k;
+    return mk(`${M1} workers finish a job in ${D1} days. In how many days will ${M2} workers finish the same job?`,D2,[D1*k,D1-k,D2+1],`Workers × days stays the same: ${M1} × ${D1} = ${M1*D1}. With ${M2} workers: ${M1*D1} ÷ ${M2} = ${D2} days. More workers, fewer days.`,d)}
+  const b=R(2,15)*6;
+  return mk(`B can do a job in ${b} days. A works twice as fast as B. In how many days will they finish it together?`,b/3,[b/2,b/4,b/3+2],`A is twice as fast, so A alone takes ${b/2} days. Take work = ${b} units: B does 1 a day, A does 2. Together 3 a day. Days = ${b} ÷ 3 = ${b/3}.`,d)},
+sdt(){const v=R(0,7);
+  if(v<3){const s=R(4,18)*5,t=R(2,8),D=s*t;
+    if(v==0) return mk(`A car travels at ${s} km/h for ${t} hours. How far does it go?`,D,[s+t,D+s,D-s],`Distance = speed × time = ${s} × ${t} = ${D} km.`,x=>x+' km');
+    if(v==1) return mk(`A bus covers ${D} km in ${t} hours. What is its speed?`,s,[s+5,s-5,s+10],`Speed = distance ÷ time = ${D} ÷ ${t} = ${s} km/h.`,x=>x+' km/h');
+    return mk(`How long does a train take to cover ${D} km at ${s} km/h?`,t,[t+1,t-1,t+2],`Time = distance ÷ speed = ${D} ÷ ${s} = ${t} hours.`,x=>x+' hours')}
+  if(v==3){const k=R(1,10)*18,a=k*5/18;
+    return mk(`Convert ${k} km/h into metres per second.`,a,[k/2,a+5,a*2],`Multiply by 5/18: ${k} × 5 ÷ 18 = ${a} m/s. (${k} ÷ 18 = ${k/18}, then × 5.)`,x=>x+' m/s')}
+  if(v==4){const ms=R(1,10)*5,a=ms*18/5;
+    return mk(`Convert ${ms} m/s into km/h.`,a,[ms*5,a+18,ms*2],`Multiply by 18/5: ${ms} ÷ 5 = ${ms/5}, then × 18 = ${a} km/h.`,x=>x+' km/h')}
+  if(v==5){const ms=P([10,15,20,25,30]),T=R(4,18),L=ms*T;
+    return mk(`A train ${L} m long runs at ${ms*18/5} km/h. How many seconds does it take to cross a pole?`,T,[T+2,T*2,T-1],`${ms*18/5} km/h × 5/18 = ${ms} m/s. To cross a pole the train covers its own length. Time = ${L} ÷ ${ms} = ${T} seconds.`,x=>x+' s')}
+  if(v==6){const ms=P([10,15,20,25,30]),t1=R(3,9),t2=R(3,9),L1=ms*t1,L2=ms*t2;
+    return mk(`A train ${L1} m long runs at ${ms*18/5} km/h. How many seconds does it take to cross a platform ${L2} m long?`,t1+t2,[t1,t2+t1+2,(t1+t2)*2],`Speed = ${ms} m/s. To cross a platform the train covers train + platform = ${L1} + ${L2} = ${L1+L2} m. Time = ${L1+L2} ÷ ${ms} = ${t1+t2} seconds.`,x=>x+' s')}
+  const [x,y,a]=P([[20,30,24],[40,60,48],[30,60,40],[10,15,12],[60,90,72],[30,45,36],[40,120,60],[20,60,30],[50,75,60],[60,120,80],[24,48,32],[12,24,16],[45,90,60],[36,72,48],[15,30,20]]);
+  return mk(`A man goes to a town at ${x} km/h and returns at ${y} km/h. What is his average speed for the whole trip?`,a,[(x+y)/2,a+2,a-2],`For the same distance both ways, average speed = 2xy ÷ (x + y) = 2 × ${x} × ${y} ÷ ${x+y} = ${a} km/h. It is not the simple average ${(x+y)/2}.`,x=>x+' km/h')},
+bod(){const v=R(0,6);
+  if(v==0){const a=R(5,40),b=R(2,12),c=R(2,9),d=R(1,9),r=a+b*c-d;
+    return mk(`Simplify: ${a} + ${b} × ${c} − ${d}`,r,[(a+b)*c-d,a+b*(c-d),r+b],`Multiplication first: ${b} × ${c} = ${b*c}. Then left to right: ${a} + ${b*c} − ${d} = ${r}.`)}
+  if(v==1){const c=R(2,8),k=R(2,9),b=c*k,d=R(2,6),a=R(10,50),r=a+k*d;
+    return mk(`Simplify: ${a} + ${b} ÷ ${c} × ${d}`,r,[Math.round((a+b)/c*d),a+k+d,r+c],`÷ and × come before +, and are done left to right: ${b} ÷ ${c} = ${k}, then ${k} × ${d} = ${k*d}. Now add: ${a} + ${k*d} = ${r}.`)}
+  if(v==2){const a=R(3,20),b=R(2,15),c=R(2,9),d=R(1,9),r=(a+b)*c-d;
+    return mk(`Simplify: (${a} + ${b}) × ${c} − ${d}`,r,[a+b*c-d,(a+b)*(c-d),r+c],`Brackets first: ${a} + ${b} = ${a+b}. Then multiply: ${a+b} × ${c} = ${(a+b)*c}. Then subtract: ${(a+b)*c} − ${d} = ${r}.`)}
+  if(v==3){const a=R(11,60),k=R(1,6),b=a-k,r=a*a-b*b;
+    return mk(`Find the value of ${a}² − ${b}²`,r,[k*k,r+k,r-(a+b)],`Use a² − b² = (a − b)(a + b) = ${k} × ${a+b} = ${r}. No need to square the numbers.`)}
+  if(v==4){const n=R(1,19),x=n*10+5,r=x*x;
+    return mk(`Find the square of ${x}.`,r,[r+100,r-100,r+10],`For a number ending in 5: multiply ${n} by the next number ${n+1} = ${n*(n+1)}, then write 25 after it: ${r}.`)}
+  if(v==5){const x=R(12,89),r=x*11,t=Math.floor(x/10),u=x%10;
+    return mk(`Find ${x} × 11`,r,[r+11,r-11,r+10],`× 11 trick: write the two digits apart and put their sum in the middle. ${t} _ ${u}, and ${t} + ${u} = ${t+u}${t+u>9?' (carry 1 to the left)':''}. Answer ${r}.`)}
+  const a=R(11,49),b=R(11,49),r=a*10+b*10;
+  return mk(`Simplify: ${a} × 10 + ${b} × 10`,r,[r+10,(a+b),a*10+b],`Take 10 common: (${a} + ${b}) × 10 = ${a+b} × 10 = ${r}.`)},
+lcm(){const v=R(0,4),g=R(2,15),[m,n]=P([[2,3],[3,4],[2,5],[3,5],[4,5],[1,2],[1,3],[2,7],[3,7],[5,6],[4,7],[3,8],[5,7]]),a=g*m,b=g*n,L=g*m*n;
+  if(v==0) return mk(`Find the HCF of ${a} and ${b}.`,g,[L,g*2,1],`${a} = ${g} × ${m} and ${b} = ${g} × ${n}. The leftovers ${m} and ${n} share no factor, so HCF = ${g}.`);
+  if(v==1) return mk(`Find the LCM of ${a} and ${b}.`,L,[a*b,g,a+b],`HCF of ${a} and ${b} is ${g}. ${a} = ${g} × ${m}, ${b} = ${g} × ${n}. LCM = ${g} × ${m} × ${n} = ${L}. Check: ${a} × ${b} ÷ ${g} = ${L}.`);
+  if(v==2) return mk(`The HCF of two numbers is ${g} and their LCM is ${L}. If one number is ${a}, what is the other?`,b,[L/g,a+g,L-a],`HCF × LCM = product of the two numbers. Other number = ${g} × ${L} ÷ ${a} = ${b}.`);
+  const [x,y,z,l]=P([[2,3,4,12],[4,6,8,24],[3,4,6,12],[5,10,15,30],[6,8,12,24],[4,5,10,20],[3,6,9,18],[6,9,12,36],[8,12,16,48],[10,15,20,60],[4,8,12,24],[5,6,10,30],[2,3,5,30],[3,5,6,30],[4,6,9,36],[12,15,20,60],[9,12,18,36],[6,10,15,30],[8,10,20,40],[3,4,5,60]]);
+  if(v==3) return mk(`Find the LCM of ${x}, ${y} and ${z}.`,l,[x*y*z,z,x+y+z],`Go up the multiples of the biggest number ${z} until all three divide it: the first one is ${l}.`);
+  return mk(`Three bells ring every ${x}, ${y} and ${z} minutes. If they ring together now, after how many minutes will they next ring together?`,l,[x*y*z,x+y+z,l*2],`"Together again" means LCM. LCM of ${x}, ${y} and ${z} = ${l} minutes.`,x=>x+' minutes')},
+ser(){const v=R(0,10);let t=[],why;
+  if(v==0){const s=R(2,40),d=R(3,15);for(let i=0;i<6;i++)t.push(s+i*d);why=`Each number is ${d} more than the one before it.`}
+  else if(v==1){const s=R(1,7),r=P([2,3]);for(let i=0;i<6;i++)t.push(s*r**i);why=`Each number is the previous one × ${r}.`}
+  else if(v==2){let x=R(1,20),d=R(1,6);const k=R(1,4),ds=[];for(let i=0;i<6;i++){t.push(x);ds.push(d);x+=d;d+=k}why=`The gaps are ${ds.slice(0,5).join(', ')}. The gap itself grows by ${k} each time.`}
+  else if(v==3){const n=R(1,12);for(let i=0;i<6;i++)t.push((n+i)**2);why=`These are squares: ${n}², ${n+1}², ${n+2}² and so on. Next is ${n+5}².`}
+  else if(v==4){const n=R(1,4);for(let i=0;i<6;i++)t.push((n+i)**3);why=`These are cubes: ${n}³, ${n+1}³, ${n+2}³ and so on. Next is ${n+5}³.`}
+  else if(v==5){let x=R(1,6);for(let i=0;i<6;i++){t.push(x);x=2*x+1}why=`Each number is double the previous one plus 1.`}
+  else if(v==6){const s=R(1,13);t=PRIMES.slice(s,s+6);why=`These are prime numbers in order.`}
+  else if(v==7){const d=R(3,12),s=R(6,12)*d+R(1,9);for(let i=0;i<6;i++)t.push(s-i*d);why=`Each number is ${d} less than the one before it.`}
+  else if(v==8){const n=R(1,9);for(let i=0;i<6;i++)t.push((n+i)*(n+i+1));why=`Each term is n × (n + 1): ${n} × ${n+1}, ${n+1} × ${n+2} and so on. Next is ${n+5} × ${n+6}.`}
+  else if(v==9){let a=R(1,6),b=R(2,8);for(let i=0;i<6;i++){t.push(a);[a,b]=[b,a+b]}why=`Each number is the sum of the two before it.`}
+  else{const k=R(1,4),s=R(0,25-5*k),ls=[];for(let i=0;i<6;i++)ls.push(AZ[s+i*k]);
+    return mk(`Find the next letter: ${ls.slice(0,5).join(', ')}, ?`,ls[5],[AZ[(s+5*k+1)%26],AZ[(s+5*k+25)%26],AZ[(s+5*k+2)%26],AZ[(s+5*k+3)%26]],`Each letter is ${k} step${k>1?'s':''} ahead of the one before it${k>1?' (skipping '+(k-1)+')':''}. After ${ls[4]} comes ${ls[5]}.`)}
+  const a=t[5];return mk(`Find the next number: ${t.slice(0,5).join(', ')}, ?`,a,[a+2,a-1,a+(a-t[4])],`${why} So the next number is ${a}.`)},
+cod(){const v=R(0,6),[w1,w2]=sh(WORDS),pos=w=>w.split('').map(c=>AZ.indexOf(c)+1),sum=w=>pos(w).reduce((a,b)=>a+b);
+  if(v==0){const rv=w=>w.split('').reverse().join('');
+    return mk(`In a certain code, ${w1} is written as ${rv(w1)}. How is ${w2} written in that code?`,rv(w2),[enc(w2,1),w2[1]+w2[0]+w2.slice(2),enc(rv(w2),1),enc(w2,-1)],`The letters of ${w1} are the same, only written backwards. Write ${w2} backwards: ${rv(w2)}.`)}
+  if(v==1){const j=w=>pos(w).join('-');
+    return mk(`If ${w1} is coded as ${j(w1)}, how is ${w2} coded?`,j(w2),[pos(w2).map(x=>x+1).join('-'),pos(w2).map(x=>27-x).join('-'),pos(w2).reverse().join('-'),pos(w2).map(x=>x+2).join('-')],`Each letter is replaced by its position in the alphabet (A = 1, B = 2 ...). ${w2.split('').map((c,i)=>c+' = '+pos(w2)[i]).join(', ')}.`)}
+  if(v==2) return mk(`If ${w1} = ${sum(w1)}, then ${w2} = ?`,sum(w2),[sum(w2)+1,sum(w2)-2,sum(w2)+w2.length],`The code is the sum of letter positions. ${w1}: ${pos(w1).join(' + ')} = ${sum(w1)}. ${w2}: ${pos(w2).join(' + ')} = ${sum(w2)}.`);
+  if(v==3){const op=w=>w.split('').map(c=>AZ[25-AZ.indexOf(c)]).join('');
+    return mk(`In a certain code, ${w1} is written as ${op(w1)}. How is ${w2} written in that code?`,op(w2),[enc(w2,1),enc(op(w2),1),op(w2).split('').reverse().join(''),enc(w2,-1)],`Each letter is swapped with its opposite letter (A ↔ Z, B ↔ Y). Position + opposite position = 27. ${w2.split('').map(c=>c+'→'+op(c)).join(', ')} = ${op(w2)}.`)}
+  const k=P([1,2,3,4,-1,-2]),ot=sh([1,2,3,4,5,-1,-2,-3].filter(x=>x!=k)).slice(0,4);
+  return mk(`In a certain code, ${w1} is written as ${enc(w1,k)}. How is ${w2} written in that code?`,enc(w2,k),ot.map(x=>enc(w2,x)),`Compare first letters: ${w1[0]} → ${enc(w1,k)[0]} is ${Math.abs(k)} step${Math.abs(k)>1?'s':''} ${k>0?'forward':'back'}. Every letter moves the same way. Apply it to ${w2}: ${w2.split('').map(c=>c+'→'+enc(c,k)).join(', ')} = ${enc(w2,k)}.`)},
+alp(){const v=R(0,5);
+  if(v==0){const n=R(2,24),L=AZ[26-n];
+    return mk(`Which letter is ${ord(n)} from the right end of the English alphabet?`,L,[AZ[n-1],AZ[25-n],AZ[27-n],AZ[n],AZ[n-2]],`From the left it is the (27 − ${n}) = ${ord(27-n)} letter, which is ${L}. Count from the nearest EJOTY letter (E5, J10, O15, T20, Y25).`)}
+  if(v==1){const w=P(WORDS),ps=w.split('').map(c=>AZ.indexOf(c)+1),s=ps.reduce((a,b)=>a+b);
+    return mk(`If A = 1, B = 2 ... Z = 26, what is the sum of the letters of ${w}?`,s,[s+1,s-2,s+3],`${w.split('').map((c,i)=>c+' = '+ps[i]).join(', ')}. Sum = ${ps.join(' + ')} = ${s}.`)}
+  if(v==2){const n=R(3,24);
+    return mk(`Which is the ${ord(n)} letter of the English alphabet?`,AZ[n-1],[AZ[n],AZ[n-2],AZ[26-n],AZ[n+1]||'A'],`Count from the nearest EJOTY letter: E = 5, J = 10, O = 15, T = 20, Y = 25. The ${ord(n)} letter is ${AZ[n-1]}.`)}
+  if(v==3){const p=R(1,12),g=R(2,6),q=p+2*g;
+    return mk(`Which letter is exactly midway between ${AZ[p-1]} and ${AZ[q-1]}?`,AZ[p+g-1],[AZ[p+g],AZ[p+g-2],AZ[p+g+1],AZ[p]],`${AZ[p-1]} = ${p} and ${AZ[q-1]} = ${q}. The middle position = (${p} + ${q}) ÷ 2 = ${p+g}, which is ${AZ[p+g-1]}.`)}
+  if(v==4){const p=R(1,15),q=p+R(3,10);
+    return mk(`How many letters are there between ${AZ[p-1]} and ${AZ[q-1]} in the English alphabet?`,q-p-1,[q-p,q-p+1,q-p-2],`${AZ[p-1]} = ${p} and ${AZ[q-1]} = ${q}. Letters in between = ${q} − ${p} − 1 = ${q-p-1}.`)}
+  const p=R(1,26);
+  return mk(`Which letter is opposite to ${AZ[p-1]} when the alphabet is paired A–Z, B–Y, C–X and so on?`,AZ[26-p],[1,25,2,24,3].map(o=>AZ[(26-p+o)%26]).filter(x=>x!=AZ[p-1]),`Positions of opposite letters add up to 27. ${AZ[p-1]} = ${p}, so the opposite is 27 − ${p} = ${27-p}, which is ${AZ[26-p]}.`)},
+dir(){const v=R(0,5),D=['North','East','South','West'],nm=P(MEN);
+  if(v==0){let [a,b,c]=P([[3,4,5],[6,8,10],[5,12,13],[9,12,15],[8,15,17],[12,16,20],[7,24,25],[15,20,25],[10,24,26]]);if(R(0,1))[a,b]=[b,a];const d1=P(['North','South']),d2=P(['East','West']);
+    return mk(`${nm} walks ${a} km towards ${d1}, then turns and walks ${b} km towards ${d2}. How far is he from the starting point?`,c,[a+b,Math.abs(b-a),c+1],`The two paths meet at a right angle, so the shortest distance is the third side of the triangle: √(${a}² + ${b}²) = √${a*a+b*b} = ${c} km.`,x=>x+' km')}
+  if(v==1||v==2){const s=R(0,3),n=v==1?3:4,ts=[];for(let i=0;i<n;i++)ts.push(P(['right','left']));let i=s;const path=[D[s]];
+    for(const t of ts){i=(i+(t=='right'?1:3))%4;path.push(D[i])}
+    return mk(`${nm} is facing ${D[s]}. He turns ${ts.join(', then ')}. Which direction is he facing now?`,D[i],D.filter(x=>x!=D[i]),`Right = clockwise (North → East → South → West). Left = anticlockwise. Step by step: ${path.join(' → ')}.`)}
+  if(v==3){const a=R(2,12);let b=R(2,15);if(b==a)b++;const s=R(0,3),t=R(0,1),e=D[(s+(t?1:3))%4],o=D[(s+(t?3:1))%4];
+    return mk(`${nm} walks ${a} km towards ${D[s]}, turns ${t?'right':'left'} and walks ${b} km, then turns ${t?'right':'left'} again and walks ${a} km. Where is he now from the starting point?`,`${b} km ${e}`,[`${b} km ${o}`,`${a} km ${e}`,`${a+b} km ${D[s]}`],`The first ${a} km and the last ${a} km are in opposite directions, so they cancel. Only the middle ${b} km remains, towards ${e}.`)}
+  if(v==4){const s=R(0,3),[rel,off]=P([['right',1],['left',3],['back',2]]);
+    return mk(`${nm} is facing ${D[s]}. Which direction is to his ${rel}?`,D[(s+off)%4],D.filter(x=>x!=D[(s+off)%4]),`Draw the four directions. Facing ${D[s]}: right is ${D[(s+1)%4]}, back is ${D[(s+2)%4]}, left is ${D[(s+3)%4]}.`)}
+  const mor=R(0,1),sd=mor?3:1,[rel,off]=P([['to his left',1],['to his right',3],['in front of him',0],['behind him',2]]),f=(sd+off)%4;
+  return mk(`One ${mor?'morning after sunrise':'evening before sunset'}, ${nm} sees that his shadow falls ${rel}. Which direction is he facing?`,D[f],D.filter(x=>x!=D[f]),`${mor?'In the morning the sun is in the East, so shadows fall towards the West.':'In the evening the sun is in the West, so shadows fall towards the East.'} His shadow (${D[sd]}) is ${rel}, so he is facing ${D[f]}.`)},
+rank(){const v=R(0,3),nm=P(WOMEN),n2=P(MEN);
+  if(v==0){const N=R(20,60),p=R(3,N-3),a=N-p+1;
+    return mk(`In a row of ${N} students, ${nm} is ${ord(p)} from the left. What is her position from the right?`,a,[N-p,N-p+2,p+1],`Position from the other end = total − position + 1 = ${N} − ${p} + 1 = ${a}.`,ord)}
+  if(v==1){const p=R(5,25),q=R(5,25),a=p+q-1;
+    return mk(`In a queue, ${n2} is ${ord(p)} from the front and ${ord(q)} from the back. How many people are in the queue?`,a,[p+q,p+q+1,p+q-2],`Adding both positions counts ${n2} twice, so subtract 1: ${p} + ${q} − 1 = ${a}.`)}
+  if(v==2){const p=R(4,12),q=R(4,12),N=p+q+R(3,25),a=N-p-q;
+    return mk(`In a row of ${N} students, ${nm} is ${ord(p)} from the left and ${n2} is ${ord(q)} from the right. How many students are between them?`,a,[a+1,a-1,a+2],`Students up to ${nm} from the left = ${p}. Students from ${n2} to the right end = ${q}. In between = ${N} − ${p} − ${q} = ${a}.`)}
+  const N=R(25,60),p=R(3,10),k=R(2,8),a=N-(p+k)+1;
+  return mk(`In a row of ${N} students, ${nm} is ${ord(p)} from the left. ${n2} is ${k} places to her right. What is ${n2}'s position from the right end?`,a,[a+1,a-1,N-p-k],`${n2} is ${p} + ${k} = ${ord(p+k)} from the left. From the right = ${N} − ${p+k} + 1 = ${a}.`,ord)},
+ana(){const v=R(0,11);
+  if(v<7){const [lab,t]=P(AT);let r1,r2;do{[r1,r2]=sh(t)}while(r1[1]==r2[1]);
+    return mk(`${r1[0]} : ${r1[1]} :: ${r2[0]} : ?`,r2[1],sh([...new Set(t.map(r=>r[1]))].filter(z=>z!=r2[1]&&z!=r1[1])),`Link: ${lab}. ${r1[0]} goes with ${r1[1]}, so ${r2[0]} goes with ${r2[1]}.`)}
+  if(v==7){const n=R(2,14);let m=R(2,15);if(m==n)m++;
+    return mk(`${n} : ${n*n} :: ${m} : ?`,m*m,[m*2,m*m+m,m*n],`${n*n} is ${n} squared. So ${m} squared = ${m*m}.`)}
+  if(v==8){const n=R(2,6);let m=R(2,7);if(m==n)m++;
+    return mk(`${n} : ${n**3} :: ${m} : ?`,m**3,[m*m,m*3,m**3+m],`${n**3} is ${n} cubed (${n} × ${n} × ${n}). So ${m} cubed = ${m**3}.`)}
+  if(v==9){const k=R(2,9),a=R(3,20);let b=R(3,20);if(b==a)b++;
+    return mk(`${a} : ${a*k} :: ${b} : ?`,b*k,[b+k,b*k+k,b*(k+1)],`${a*k} is ${a} × ${k}. So ${b} × ${k} = ${b*k}.`)}
+  if(v==10){const k=R(3,15),a=R(5,40);let b=R(5,40);if(b==a)b++;
+    return mk(`${a} : ${a+k} :: ${b} : ?`,b+k,[b+k+1,b+k-2,b*2],`${a+k} is ${a} + ${k}. So ${b} + ${k} = ${b+k}.`)}
+  const k=P([1,2,3,-1]),rw=()=>[0,0,0].map(()=>AZ[R(3,21)]).join(''),s1=rw(),s2=rw();
+  return mk(`${s1} : ${enc(s1,k)} :: ${s2} : ?`,enc(s2,k),sh([1,2,3,4,-1,-2].filter(x=>x!=k)).map(x=>enc(s2,x)),`Each letter moves ${Math.abs(k)} step${Math.abs(k)>1?'s':''} ${k>0?'forward':'back'}: ${s1[0]} → ${enc(s1,k)[0]}. Do the same to ${s2}: ${enc(s2,k)}.`)},
+odd(){const v=R(0,10),out=(arr,one,sol)=>{const o=sh(arr.concat([one])).map(String);return {q:`Find the odd one out: ${o.join(', ')}`,opts:o,a:o.indexOf(String(one)),sol}};
+  if(v<6){const [A,Bc]=sh(OC),one=P(Bc[2]);return out(sh(A[2]).slice(0,3),one,`${one} is ${Bc[0]}. The others are ${A[1]}.`)}
+  if(v==6){const one=P([9,15,21,25,27,33,35,39,49,51,55,57]);return out(sh(PRIMES.slice(1,16)).slice(0,3),one,`${one} can be divided by a smaller number, so it is not prime. The others are prime numbers.`)}
+  if(v==7){const ev=R(0,1),sq=ev?[4,16,36,64,100,144,196]:[9,25,49,81,121,169,225],three=sh(sq).slice(0,3),one=P(sq)+2;return out(three,one,`${three.join(', ')} are perfect squares. ${one} is not a perfect square.`)}
+  if(v==8){const k=P([3,4,5,6,7,9]),three=sh([1,2,3,4,5,6,7,8]).slice(0,3).map(r=>k*2*r),one=k*2*R(1,8)+2;return out(three,one,`${three.join(', ')} are all multiples of ${k}. ${one} is not.`)}
+  if(v==9){const ev=R(0,1),three=sh([12,14,18,22,26,34,38,46,52,58,62,74,86]).slice(0,3).map(x=>ev?x:x+1),one=P([15,21,33,45,51,63,75,87])+(ev?0:1);return out(three,one,`${one} is ${ev?'odd':'even'}. The others are ${ev?'even':'odd'} numbers.`)}
+  const k=R(1,4),st=sh([...Array(26-2*k).keys()]).slice(0,4),gs=st.map(s=>AZ[s]+AZ[s+k]+AZ[s+2*k]),s=st[3],bad=AZ[s]+AZ[s+k]+AZ[(s+2*k+1)%26];
+  return out(gs.slice(0,3),bad,`In the others each letter is ${k} step${k>1?'s':''} after the one before it. ${bad} breaks that pattern at the last letter.`)},
+blood(){const [A,B2,C]=sh(MEN),[X,Y,Z]=sh(WOMEN),v=R(0,17),t=(q,c,w,sol)=>mk(q,c,w,sol);
+  switch(v){
+  case 0:return t(`${A} is the father of ${B2}. ${B2} is the brother of ${X}. How is ${X} related to ${A}?`,'Daughter',['Sister','Mother','Niece'],`${B2} and ${X} are brother and sister, so both are children of ${A}. ${X} is female, so she is his daughter.`);
+  case 1:return t(`${X} is the mother of ${A}. ${A} is the father of ${Y}. How is ${X} related to ${Y}?`,'Grandmother',['Mother','Aunt','Sister'],`${X} is the mother of ${Y}'s father. Father's mother = grandmother.`);
+  case 2:return t(`${A} is the brother of ${X}. ${X} is the mother of ${B2}. How is ${A} related to ${B2}?`,'Uncle',['Father','Grandfather','Cousin'],`${A} is the brother of ${B2}'s mother. Mother's brother = maternal uncle.`);
+  case 3:return t(`${A} is the son of ${B2}. ${B2} is the son of ${C}. How is ${C} related to ${A}?`,'Grandfather',['Father','Uncle','Brother'],`${C} is the father of ${A}'s father. Father's father = grandfather.`);
+  case 4:return t(`${X} is the wife of ${A}. ${A} is the brother of ${Y}. How is ${X} related to ${Y}?`,'Sister-in-law',['Sister','Aunt','Mother'],`${X} is married to ${Y}'s brother. Brother's wife = sister-in-law.`);
+  case 5:return t(`${A} is the husband of ${X}. ${X} is the mother of ${B2}. How is ${A} related to ${B2}?`,'Father',['Uncle','Brother','Grandfather'],`${X} is ${B2}'s mother and ${A} is her husband, so ${A} is ${B2}'s father.`);
+  case 6:return t(`${X} is the sister of ${A}. ${A} is the father of ${Y}. How is ${X} related to ${Y}?`,'Aunt',['Mother','Sister','Grandmother'],`${X} is the sister of ${Y}'s father. Father's sister = aunt.`);
+  case 7:return t(`${A} and ${X} are brother and sister. ${B2} is the son of ${X}. How is ${B2} related to ${A}?`,'Nephew',['Son','Cousin','Brother'],`${B2} is the son of ${A}'s sister. Sister's son = nephew.`);
+  case 8:return t(`${A} is the father of ${X}. ${Y} is the daughter of ${X}. How is ${Y} related to ${A}?`,'Granddaughter',['Daughter','Niece','Sister'],`${Y} is the daughter of ${A}'s daughter. Daughter's daughter = granddaughter.`);
+  case 9:return t(`${X} is the daughter of ${A}. ${B2} is the brother of ${A}. How is ${B2} related to ${X}?`,'Uncle',['Father','Grandfather','Cousin'],`${B2} is the brother of ${X}'s father. Father's brother = paternal uncle.`);
+  case 10:return t(`${A} is the son of ${X}. ${Y} is the daughter of ${X}'s sister. How is ${Y} related to ${A}?`,'Cousin',['Sister','Niece','Aunt'],`${X}'s sister is ${A}'s aunt. The aunt's daughter is ${A}'s cousin.`);
+  case 11:return t(`${A} is the father of ${B2}. ${X} is the wife of ${B2}. How is ${X} related to ${A}?`,'Daughter-in-law',['Daughter','Sister','Niece'],`${X} is the wife of ${A}'s son. Son's wife = daughter-in-law.`);
+  case 12:return t(`${X} is the mother of ${A}. ${B2} is the father of ${X}'s husband. How is ${B2} related to ${A}?`,'Grandfather',['Father','Uncle','Father-in-law'],`${X}'s husband is ${A}'s father. His father ${B2} is ${A}'s grandfather.`);
+  case 13:return t(`${A} is the brother of ${B2}. ${X} is the daughter of ${B2}. How is ${X} related to ${A}?`,'Niece',['Daughter','Cousin','Sister'],`${X} is the daughter of ${A}'s brother. Brother's daughter = niece.`);
+  case 14:return t(`Pointing to a man, ${X} said, "His mother is the only daughter of my mother." How is ${X} related to the man?`,'Mother',['Sister','Aunt','Grandmother'],`"Only daughter of my mother" is ${X} herself. So she is the man's mother.`);
+  case 15:return t(`Pointing to a photo, ${A} said, "I have no brother or sister, but that man's father is my father's son." Whose photo is it?`,"His son's",['His own',"His father's","His nephew's"],`${A} has no brother, so "my father's son" is ${A} himself. He is the father of the man in the photo. It is his son.`);
+  case 16:return t(`Pointing to a girl, ${A} said, "She is the daughter of my grandfather's only son." How is the girl related to ${A}?`,'Sister',['Cousin','Niece','Daughter'],`Grandfather's only son is ${A}'s father. His daughter is ${A}'s sister.`);
+  default:return t(`${X} introduces ${A} as "the son of the only brother of my father". How is ${A} related to ${X}?`,'Cousin',['Brother','Uncle','Nephew'],`Father's brother = uncle. The uncle's son is her cousin.`)}}
+};
+
+/* ---------- question bank: each entry holds a question, the answer, a pool of wrong options and the reason ---------- */
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const Lq=s=>s.trim().split('\n').map(r=>{const f=r.split('|');return {q:f[0],c:f[1],w:f.slice(2,5),sol:f[5]||''}});
+const pairs=(t,qf,sf)=>t.map(([x,y])=>({q:qf(x),c:y,w:[...new Set(t.map(r=>r[1]))].filter(v=>v!=y),sol:sf(x,y)}));
+const VOC=tb('ABUNDANT=plentiful=scarce;BRIEF=short=lengthy;CANDID=frank=secretive;DILIGENT=hardworking=lazy;EMINENT=famous=unknown;FRAGILE=delicate=sturdy;GENUINE=real=fake;HOSTILE=unfriendly=welcoming;OBSOLETE=outdated=current;VACANT=empty=occupied;EXPAND=enlarge=shrink;GENEROUS=giving=miserly;VICTORY=triumph=defeat;TRANSPARENT=see-through=opaque;HUMBLE=modest=arrogant;BRAVE=courageous=cowardly;CALM=peaceful=agitated;RIGID=stiff=flexible;ACCEPT=receive=reject;CONCEAL=hide=reveal;ENORMOUS=huge=tiny;RAPID=fast=slow;ASSIST=help=hinder;BARREN=infertile=fertile;CAUTIOUS=careful=reckless;DESPAIR=hopelessness=hope;ELEVATE=raise=lower;FORBID=prohibit=allow;GLOOMY=dismal=cheerful;KEEN=eager=reluctant;LOYAL=faithful=treacherous;MATURE=grown-up=childish;NOVICE=beginner=expert;PROFIT=gain=loss;QUARREL=dispute=harmony;REMOTE=distant=nearby;SEVERE=harsh=mild;WEALTHY=rich=poor;YIELD=surrender=resist;ADMIRE=respect=despise;BENEFICIAL=useful=harmful;COMPULSORY=mandatory=optional;DEFEND=protect=attack;GRATEFUL=thankful=ungrateful;INFERIOR=lower in quality=superior;MINIMUM=least=maximum;REPAIR=mend=damage;SCATTER=disperse=gather;THRIVE=flourish=wither;UNITE=join=separate;VANISH=disappear=appear;PUNCTUAL=on time=late;ACCURATE=precise=incorrect;EXPENSIVE=costly=cheap;ARRIVE=reach=depart;LIBERTY=freedom=slavery;STRANGE=unusual=ordinary');
+const IDI=tb(`A piece of cake=Something very easy;Break the ice=Start a conversation;Once in a blue moon=Very rarely;Hit the nail on the head=Say exactly the right thing;Spill the beans=Reveal a secret;Under the weather=Slightly ill;Burn the midnight oil=Work late into the night;Cry over spilt milk=Regret something that cannot be undone;At the eleventh hour=At the last moment;A blessing in disguise=A good thing that looked bad at first;Beat around the bush=Avoid the main point;Bite the bullet=Face a hard situation bravely;Call it a day=Stop working;Cost an arm and a leg=Be very expensive;Cut corners=Do a job cheaply or carelessly;Add fuel to the fire=Make a bad situation worse;Apple of one's eye=A person loved very much;A bolt from the blue=A sudden, unexpected event;In hot water=In trouble;Kill two birds with one stone=Achieve two things with one action;A white elephant=A costly but useless possession;Turn a deaf ear=Refuse to listen;Smell a rat=Suspect that something is wrong;Pull someone's leg=Tease someone playfully;On cloud nine=Extremely happy;Hand in glove=Working closely together;A red-letter day=A memorable, happy day;Back out=Withdraw from a promise;At sixes and sevens=In disorder and confusion;A bed of roses=A life of comfort;A black sheep=A person who brings shame to the family;Crocodile tears=A false show of sorrow;Turn over a new leaf=Change for the better;In black and white=In writing;A hard nut to crack=A difficult problem or person;Through thick and thin=In good times and bad;Make both ends meet=Manage with a small income;See eye to eye=Agree fully;A wild goose chase=A useless search;Hold your tongue=Stay silent;The lion's share=The largest part;Rain cats and dogs=Rain very heavily;Keep an eye on=Watch carefully`);
+const OWS=tb(`a person who knows many languages=Polyglot;the life story of a person written by himself or herself=Autobiography;the life story of a person written by someone else=Biography;fear of water=Hydrophobia;fear of heights=Acrophobia;fear of closed spaces=Claustrophobia;a person who does not believe in God=Atheist;a person who eats human flesh=Cannibal;government by the people=Democracy;government by a king or queen=Monarchy;government by one person with all the power=Autocracy;handwriting that cannot be read=Illegible;a person who loves books=Bibliophile;the study of birds=Ornithology;the study of insects=Entomology;a place where birds are kept=Aviary;a place where bees are kept=Apiary;a person who collects stamps=Philatelist;a person who collects coins=Numismatist;a sound that cannot be heard=Inaudible;something that cannot be seen=Invisible;something that cannot be avoided=Inevitable;an army that cannot be defeated=Invincible;one who knows everything=Omniscient;one who is present everywhere=Omnipresent;one who is all-powerful=Omnipotent;an animal that eats both plants and animals=Omnivore;an animal that eats only plants=Herbivore;an animal that lives on land and in water=Amphibian;a person who walks in sleep=Somnambulist;a person who hates mankind=Misanthrope;a person who works for the welfare of others=Philanthropist;a speech made without preparation=Extempore;a person who cannot read or write=Illiterate;a period of one hundred years=Century;a period of ten years=Decade;a child whose parents are dead=Orphan;a person who always looks at the bright side=Optimist;a person who always looks at the dark side=Pessimist;a remedy for all diseases=Panacea;a person living at the same time as another=Contemporary;a post held without pay=Honorary;a person new to a job or skill=Novice;a place where coins are made=Mint;a place where grain is stored=Granary;a place where government records are kept=Archives;the study of ancient remains=Archaeology;a person who travels on foot=Pedestrian;the shortened form of a word=Abbreviation;a person who is unable to pay debts=Insolvent`);
+const B={
+syn:VOC.map(([w,s,a])=>({q:`Choose the word closest in meaning to ${w}`,c:cap(s),f:[cap(a)],w:VOC.filter(r=>r[0]!=w).map(r=>cap(r[1])),sol:`${w} means ${s}. Its opposite is ${a}, which is often given as a trap.`})),
+ant:VOC.map(([w,s,a])=>({q:`Choose the word opposite in meaning to ${w}`,c:cap(a),f:[cap(s)],w:VOC.filter(r=>r[0]!=w).map(r=>cap(r[2])),sol:`${w} means ${s}. So its opposite is ${a}. The option "${cap(s)}" is the same meaning, not the opposite.`})),
+idi:pairs(IDI,x=>`Meaning of the idiom: ${x}`,(x,y)=>`"${x}" means: ${y.toLowerCase()}. An idiom cannot be understood word by word, so learn it as a whole.`),
+ows:pairs(OWS,x=>`One word for: ${x}`,(x,y)=>`${y} = ${x}.`),
+spl:Lq(`Accommodation|Acommodation|Accomodation|Acomodation|Two c's and two m's.
+Committee|Commitee|Comittee|Committe|Double m, double t, double e.
+Occurrence|Occurence|Ocurrence|Occurrance|Double c, double r, and it ends in -ence.
+Necessary|Neccessary|Necesary|Neccesary|One c, two s's. A shirt has one collar and two sleeves.
+Embarrass|Embarass|Embaras|Embarras|Double r and double s.
+Definitely|Definately|Definitly|Defanitely|It contains the word finite.
+Receive|Recieve|Receeve|Receve|i before e, except after c.
+Maintenance|Maintainance|Maintenence|Maintanance|Maintain changes to mainten-.
+Separate|Seperate|Separete|Sepparate|There is "a rat" in separate.
+Government|Goverment|Governmant|Govenment|Govern + ment. Do not drop the n.
+Environment|Enviroment|Envirnment|Environmant|Environ + ment. Do not drop the n.
+Privilege|Privelege|Priviledge|Privilage|Two i's then two e's. No d.
+Calendar|Calender|Calandar|Callendar|Ends in -dar.
+Beginning|Begining|Beggining|Beginnning|One g, double n.
+Believe|Beleive|Belive|Beleeve|i before e. There is a "lie" in believe.
+Conscience|Concience|Consience|Conscence|Con + science.
+Tomorrow|Tommorow|Tommorrow|Tomorow|One m, double r.
+Successful|Succesful|Successfull|Sucessful|Double c, double s, one l.
+Address|Adress|Addres|Adresss|Double d, double s.
+Achieve|Acheive|Achive|Acheeve|i before e.
+Argument|Arguement|Arguemint|Argumant|Argue drops its e.
+Lieutenant|Leutenant|Lieutenent|Liutenant|Lie + u + tenant.
+Restaurant|Restaurent|Resturant|Restraunt|Rest + au + rant.
+Questionnaire|Questionaire|Questionnare|Questionairre|Double n, one r.
+Millennium|Millenium|Milennium|Millenniam|Double l, double n.
+Pronunciation|Pronounciation|Pronunceation|Pronuntiation|Pronounce loses its o: pro-nun-ciation.
+Grammar|Grammer|Gramar|Grammor|Ends in -mar.
+Parallel|Paralel|Parallell|Parralel|One r, then double l, then one l.
+Vacuum|Vaccum|Vacum|Vaccuum|One c, double u.
+Guarantee|Gaurantee|Guarentee|Garantee|Gu-a-ran-tee.
+Occasion|Ocassion|Occassion|Occasian|Double c, one s.
+Recommend|Recomend|Reccommend|Reccomend|One c, double m.
+Rhythm|Rythm|Rhythem|Rhytm|R-h-y-t-h-m. No vowels at all.
+Surprise|Suprise|Surprize|Surprice|Do not drop the first r.
+Business|Bussiness|Buisness|Busines|Busy changes to busi + ness.
+Foreign|Foriegn|Foreing|Forein|An exception to the i-before-e rule.
+Height|Hieght|Heigth|Hight|e before i here.
+Library|Libary|Librery|Liberary|Do not drop the first r.
+Neighbour|Nieghbour|Neighbor|Naighbour|e before i. British spelling keeps the u.
+Weird|Wierd|Weerd|Wird|An exception: e before i.`).map(e=>({q:'Choose the correctly spelt word',c:e.q,w:[e.c].concat(e.w.slice(0,2)),sol:`Correct spelling: ${e.q}. ${e.w[2]||''}`})),
+gram:Lq(`Fill in the blank: He is senior ___ me.|to|than|from|of|Senior, junior, superior, inferior and prior always take "to", never "than".
+Fill in the blank: She has been living here ___ 2010.|since|for|from|by|Use "since" with a starting point. Use "for" with a length of time.
+Fill in the blank: I have been waiting ___ two hours.|for|since|from|till|"Two hours" is a length of time, so use "for".
+Fill in the blank: Neither of the boys ___ present.|was|were|are|have|Neither, either, each and one of take a singular verb.
+Fill in the blank: I prefer tea ___ coffee.|to|than|over|from|Prefer always takes "to".
+Fill in the blank: He is good ___ mathematics.|at|in|on|with|"Good at" is a fixed pair.
+Fill in the blank: One of my friends ___ a doctor.|is|are|were|have|The subject is "one", which is singular.
+Fill in the blank: She is ___ honest woman.|an|a|the|no article|"Honest" starts with a vowel sound because the h is silent.
+Fill in the blank: The train had left before we ___ the station.|reached|reach|had reached|have reached|The earlier action takes past perfect. The later one takes simple past.
+Fill in the blank: He ___ to school every day.|goes|go|going|gone|A daily habit takes simple present. With he, she, it add -s or -es.
+Fill in the blank: Each of the students ___ a book.|has|have|are having|were|"Each" is singular.
+Change to passive voice: She writes a letter.|A letter is written by her.|A letter was written by her.|A letter is being written by her.|A letter has been written by her.|Simple present active becomes is/am/are + third form.
+Change to indirect speech: He said, "I am tired."|He said that he was tired.|He said that I am tired.|He said that he is tired.|He told that he was tired.|Reporting verb in the past: am becomes was, I becomes he.
+Fill in the blank: The news ___ true.|is|are|were|have|"News" looks plural but is singular.
+Fill in the blank: Mathematics ___ my favourite subject.|is|are|were|have|Subject names ending in -s are singular.
+Fill in the blank: She is afraid ___ dogs.|of|from|with|by|"Afraid of" is a fixed pair.
+Fill in the blank: He was accused ___ theft.|of|for|with|on|Accused of, but charged with.
+Fill in the blank: I congratulated him ___ his success.|on|for|at|with|"Congratulate on" is a fixed pair.
+Fill in the blank: She is married ___ a doctor.|to|with|by|of|Married to, never married with.
+Fill in the blank: He is fond ___ music.|of|with|in|to|"Fond of" is a fixed pair.
+Fill in the blank: This book is different ___ that one.|from|than|to|with|In exams, "different from" is the accepted form.
+Fill in the blank: He jumped ___ the river.|into|in|on|at|Use "into" for movement from outside to inside.
+Fill in the blank: Distribute the sweets ___ the five children.|among|between|in|with|Among for more than two. Between for two.
+Fill in the blank: Divide the mango ___ the two brothers.|between|among|in|with|Between for two. Among for more than two.
+Fill in the blank: She is ___ university student.|a|an|the|no article|"University" starts with a "yoo" sound, which is a consonant sound.
+Fill in the blank: ___ Ganga is a holy river.|The|A|An|No article|Names of rivers, seas and mountain ranges take "the".
+Fill in the blank: He is ___ tallest boy in the class.|the|a|an|no article|The superlative degree always takes "the".
+Fill in the blank: If I ___ a bird, I would fly.|were|was|am|will be|For an unreal wish or condition, use "were" with every subject.
+Fill in the blank: I look forward to ___ you.|meeting|meet|met|be meeting|"Look forward to" is followed by the -ing form.
+Fill in the blank: No sooner had he left ___ it started to rain.|than|when|then|that|No sooner ... than. Hardly ... when.
+Fill in the blank: Hardly had I slept ___ the phone rang.|when|than|then|that|Hardly and scarcely take "when".
+Fill in the blank: Bread and butter ___ my usual breakfast.|is|are|were|have|Two nouns that make one item take a singular verb.
+Fill in the blank: The police ___ caught the thief.|have|has|is|was|"Police" is always plural.
+Fill in the blank: He, as well as his friends, ___ coming.|is|are|were|have|With "as well as", the verb follows the first subject.
+Fill in the blank: Many a student ___ failed.|has|have|are|were|"Many a" takes a singular noun and a singular verb.
+Fill in the blank: She ___ here since morning.|has been|is|was|had|Since + point of time needs the perfect tense.
+Fill in the blank: I ___ him yesterday.|met|have met|had met|meet|A finished time word like "yesterday" takes simple past.
+Fill in the blank: The furniture ___ very old.|is|are|were|have|Furniture, luggage, information and advice are uncountable and singular.
+Fill in the blank: He died ___ cancer.|of|from|by|with|Die of a disease.
+Fill in the blank: She is taller ___ her sister.|than|then|to|from|The comparative degree takes "than".
+Fill in the blank: He has been absent ___ Monday.|since|for|from|by|Monday is a point of time, so use "since".
+Change to passive voice: They are building a house.|A house is being built by them.|A house is built by them.|A house was being built by them.|A house has been built by them.|Present continuous passive: is/are + being + third form.
+Change to passive voice: He wrote a letter.|A letter was written by him.|A letter is written by him.|A letter had been written by him.|A letter was being written by him.|Simple past passive: was/were + third form.
+Change to indirect speech: She said, "I will come."|She said that she would come.|She said that she will come.|She said that I would come.|She told that she would come.|Will changes to would. I changes to she.
+Change to indirect speech: He said to me, "Where do you live?"|He asked me where I lived.|He asked me where do I live.|He said to me where I lived.|He asked me where did I live.|A question becomes a statement: asked + question word + subject + verb.
+What is the plural of "child"?|Children|Childs|Childrens|Childes|Irregular plural: child, children.
+What is the plural of "criterion"?|Criteria|Criterions|Criterias|Criterian|Greek words in -on take -a: criterion, criteria.
+What is the past tense of "teach"?|Taught|Teached|Teacht|Tought|Irregular verb: teach, taught, taught.
+What is the past participle of "write"?|Written|Wrote|Writed|Writen|Write, wrote, written.`),
+pol:Lq(`How many Fundamental Duties are listed in the Constitution of India?|11|10|6|12|Ten duties were added by the 42nd Amendment (1976). The 11th was added in 2002.
+Fundamental Rights are in which Part of the Constitution?|Part III|Part IV|Part II|Part V|Part III = Fundamental Rights (Articles 12 to 35). Part IV = Directive Principles.
+Which Article gives the right to life and personal liberty?|Article 21|Article 14|Article 19|Article 32|21 = life and liberty. 14 = equality. 19 = six freedoms.
+Who was the chairman of the Drafting Committee of the Constitution?|B. R. Ambedkar|Rajendra Prasad|Jawaharlal Nehru|Sardar Patel|Rajendra Prasad was President of the Constituent Assembly. Ambedkar chaired the Drafting Committee.
+What is the minimum age to become the President of India?|35 years|25 years|30 years|40 years|President and Vice-President 35. Rajya Sabha 30. Lok Sabha 25.
+The Constitution of India came into force on|26 January 1950|15 August 1947|26 November 1949|30 January 1950|Adopted on 26 November 1949. In force from 26 January 1950.
+Which Article abolishes untouchability?|Article 17|Article 15|Article 18|Article 23|17 = untouchability abolished. 18 = titles abolished.
+The Directive Principles of State Policy were borrowed from the constitution of|Ireland|USA|Britain|Canada|DPSP from Ireland. Fundamental Rights from USA.
+Who appoints the Chief Justice of India?|The President|The Prime Minister|The Parliament|The Law Minister|All Supreme Court judges are appointed by the President.
+Which Article did Dr Ambedkar call the heart and soul of the Constitution?|Article 32|Article 21|Article 14|Article 368|Article 32 is the right to constitutional remedies.
+A Money Bill can be introduced only in the|Lok Sabha|Rajya Sabha|Either House|A joint sitting|The Rajya Sabha can hold a Money Bill for only 14 days.
+What is the maximum strength of the Rajya Sabha?|250|245|238|545|238 elected and 12 nominated by the President.
+How many Schedules does the Constitution have at present?|12|8|10|22|It started with 8 Schedules. Now there are 12.
+The words Socialist and Secular were added to the Preamble by which Amendment?|42nd|44th|52nd|73rd|The 42nd Amendment (1976) is called the mini Constitution.
+The Right to Education is given in|Article 21A|Article 19|Article 24|Article 45|Added by the 86th Amendment (2002) for children aged 6 to 14.
+Which Amendment reduced the voting age from 21 to 18?|61st|42nd|44th|73rd|61st Amendment, 1988.
+A National Emergency is declared under|Article 352|Article 356|Article 360|Article 368|352 national emergency. 356 President's Rule. 360 financial emergency.
+President's Rule in a state is imposed under|Article 356|Article 352|Article 360|Article 370|352 national emergency. 356 President's Rule. 360 financial emergency.
+A Financial Emergency is declared under|Article 360|Article 352|Article 356|Article 324|352 national emergency. 356 President's Rule. 360 financial emergency.
+Who was the first President of India?|Dr Rajendra Prasad|Dr S. Radhakrishnan|Jawaharlal Nehru|Dr Zakir Husain|Rajendra Prasad was President from 1950 to 1962.
+Who is the ex-officio Chairman of the Rajya Sabha?|The Vice-President|The President|The Speaker|The Prime Minister|The Vice-President chairs the Rajya Sabha.
+The term of a Rajya Sabha member is|6 years|5 years|4 years|2 years|One third of the members retire every two years.
+Who presides over the Lok Sabha?|The Speaker|The President|The Vice-President|The Prime Minister|The Speaker is elected by Lok Sabha members.
+Fundamental Duties are given in|Article 51A|Article 21A|Article 32|Article 44|Part IVA, Article 51A.
+Fundamental Duties were borrowed from the constitution of|USSR (Russia)|USA|Ireland|Japan|Duties from the former USSR. DPSP from Ireland.
+Which Amendment gave constitutional status to Panchayati Raj?|73rd|74th|42nd|86th|73rd = Panchayats. 74th = Municipalities.
+Which Amendment gave constitutional status to Municipalities?|74th|73rd|61st|44th|73rd = Panchayats. 74th = Municipalities.
+The retirement age of a Supreme Court judge is|65 years|62 years|60 years|70 years|Supreme Court 65. High Court 62.
+The retirement age of a High Court judge is|62 years|65 years|60 years|58 years|Supreme Court 65. High Court 62.
+The Goods and Services Tax (GST) was brought in by which Amendment?|101st|99th|100th|103rd|101st Amendment Act, 2016. GST began on 1 July 2017.
+The Election Commission of India is set up under|Article 324|Article 280|Article 148|Article 76|324 Election Commission. 280 Finance Commission. 148 CAG. 76 Attorney General.
+The Finance Commission is set up under|Article 280|Article 324|Article 148|Article 315|324 Election Commission. 280 Finance Commission. 148 CAG.
+The Comptroller and Auditor General (CAG) is mentioned in|Article 148|Article 76|Article 280|Article 324|324 Election Commission. 280 Finance Commission. 148 CAG. 76 Attorney General.
+Who is the first law officer of the Government of India?|Attorney General|Solicitor General|Chief Justice of India|Law Minister|The Attorney General is appointed under Article 76.
+The Uniform Civil Code is mentioned in|Article 44|Article 40|Article 48|Article 51|44 Uniform Civil Code. 40 village panchayats.
+The idea of Judicial Review was taken from|USA|Britain|Ireland|Canada|Fundamental Rights and judicial review came from the USA.
+The Concurrent List was taken from the constitution of|Australia|USA|Canada|Germany|Concurrent List from Australia. Emergency provisions from Germany.
+The anti-defection law is in which Schedule?|Tenth Schedule|Eighth Schedule|Ninth Schedule|Seventh Schedule|Added by the 52nd Amendment in 1985.
+How many languages are listed in the Eighth Schedule?|22|18|14|24|The Eighth Schedule lists 22 languages.
+The Union, State and Concurrent Lists are in the|Seventh Schedule|Fifth Schedule|Tenth Schedule|Third Schedule|Seventh Schedule = three lists.
+Who administers the oath of office to the President?|Chief Justice of India|Vice-President|Prime Minister|Speaker of the Lok Sabha|The Chief Justice of India gives the oath to the President.
+Constitution Day is observed on|26 November|26 January|15 August|2 October|The Constitution was adopted on 26 November 1949.
+How many Fundamental Rights are there at present?|Six|Seven|Five|Eleven|There were seven. The Right to Property was removed.
+The Right to Property was removed from the Fundamental Rights by the|44th Amendment|42nd Amendment|61st Amendment|73rd Amendment|In 1978. It is now a legal right under Article 300A.
+What is the minimum age to become a member of the Lok Sabha?|25 years|21 years|30 years|35 years|Lok Sabha 25. Rajya Sabha 30. President 35.
+What is the minimum age to become a member of the Rajya Sabha?|30 years|25 years|35 years|21 years|Lok Sabha 25. Rajya Sabha 30. President 35.
+The President of India can be removed by|Impeachment|A no-confidence motion|A court order|A vote of the Cabinet|Impeachment is under Article 61.
+The Preamble of the Constitution begins with the words|We, the people of India|India, that is Bharat|In the name of God|We, the citizens of India|The Preamble shows that power comes from the people.
+Who is the head of the Union Council of Ministers?|The Prime Minister|The President|The Vice-President|The Speaker|The Prime Minister heads the Council of Ministers. The President is the head of state.`),
+his:Lq(`The Battle of Plassey was fought in|1757|1764|1857|1526|Robert Clive defeated Siraj-ud-Daulah in 1757.
+The Battle of Buxar was fought in|1764|1757|1857|1761|Plassey 1757, then Buxar 1764.
+Who won the First Battle of Panipat in 1526?|Babur|Akbar|Ibrahim Lodi|Humayun|Babur defeated Ibrahim Lodi and founded the Mughal Empire.
+The Second Battle of Panipat (1556) was fought between Akbar and|Hemu|Ibrahim Lodi|Sher Shah Suri|Rana Sanga|Akbar's forces under Bairam Khan defeated Hemu.
+The Third Battle of Panipat (1761) was fought between the Marathas and|Ahmad Shah Abdali|Nadir Shah|The British|Tipu Sultan|Ahmad Shah Abdali defeated the Marathas in 1761.
+Who founded the Maurya Empire?|Chandragupta Maurya|Ashoka|Bindusara|Chanakya|Chandragupta Maurya founded it with Chanakya's guidance.
+The Great Bath of the Harappan civilisation was found at|Mohenjo-daro|Harappa|Lothal|Kalibangan|Great Bath = Mohenjo-daro. Dockyard = Lothal.
+The Harappan dockyard was found at|Lothal|Mohenjo-daro|Harappa|Dholavira|Lothal is in Gujarat.
+The Quit India Movement started in|1942|1930|1920|1919|1920 Non-Cooperation, 1930 Civil Disobedience, 1942 Quit India.
+The Jallianwala Bagh massacre took place in|1919|1921|1915|1930|13 April 1919 at Amritsar under General Dyer.
+The Indian National Congress was founded in|1885|1857|1905|1947|Founded in 1885 by A. O. Hume.
+Who gave the slogan "Do or Die"?|Mahatma Gandhi|Subhas Chandra Bose|Bhagat Singh|Bal Gangadhar Tilak|Gandhi gave it in 1942 during the Quit India Movement.
+The Dandi March took place in|1930|1920|1942|1935|Gandhi walked from Sabarmati to Dandi in 1930 to break the salt law.
+Who started the construction of the Qutub Minar?|Qutb-ud-din Aibak|Iltutmish|Alauddin Khalji|Akbar|Aibak started it. Iltutmish completed it.
+The Cellular Jail (Kala Pani) is located in|Port Blair (Sri Vijaya Puram)|Kolkata|Chennai|Car Nicobar|The British built it in the Andamans to exile freedom fighters.
+After which war did Ashoka give up violence?|Kalinga War|Battle of Plassey|Battle of Hydaspes|Battle of Tarain|After the Kalinga War (about 261 BC) Ashoka adopted Buddhism.
+The Revolt of 1857 began at|Meerut|Delhi|Kanpur|Jhansi|It began at Meerut on 10 May 1857.
+Who was the last Mughal emperor?|Bahadur Shah Zafar|Aurangzeb|Shah Alam II|Akbar II|Bahadur Shah Zafar was exiled to Rangoon after 1857.
+The Partition of Bengal (1905) was carried out by|Lord Curzon|Lord Canning|Lord Ripon|Lord Dalhousie|Curzon divided Bengal in 1905. It was cancelled in 1911.
+Who said "Swaraj is my birthright and I shall have it"?|Bal Gangadhar Tilak|Mahatma Gandhi|Lala Lajpat Rai|Subhas Chandra Bose|Tilak was called Lokmanya.
+Who gave the slogan "Give me blood and I will give you freedom"?|Subhas Chandra Bose|Bhagat Singh|Mahatma Gandhi|Chandra Shekhar Azad|Netaji Subhas Chandra Bose.
+Who gave the slogan "Jai Jawan Jai Kisan"?|Lal Bahadur Shastri|Jawaharlal Nehru|Indira Gandhi|Sardar Patel|Lal Bahadur Shastri in 1965.
+Who founded the Arya Samaj?|Swami Dayanand Saraswati|Raja Ram Mohan Roy|Swami Vivekananda|Annie Besant|Arya Samaj, 1875.
+Who founded the Brahmo Samaj?|Raja Ram Mohan Roy|Swami Dayanand Saraswati|Swami Vivekananda|Keshab Chandra Sen|Brahmo Samaj, 1828.
+Who founded the Ramakrishna Mission?|Swami Vivekananda|Ramakrishna Paramahansa|Raja Ram Mohan Roy|Swami Dayanand Saraswati|Vivekananda founded it in 1897 in the name of his guru.
+Who was the first Governor-General of Bengal?|Warren Hastings|Lord Clive|Lord Cornwallis|Lord Canning|Warren Hastings, 1773.
+Who was the first Viceroy of India?|Lord Canning|Lord Curzon|Lord Mountbatten|Warren Hastings|Lord Canning became the first Viceroy in 1858.
+Who was the last Viceroy of India?|Lord Mountbatten|Lord Wavell|Lord Linlithgow|Lord Irwin|Mountbatten was also the first Governor-General of free India.
+The practice of Sati was banned in 1829 by|Lord William Bentinck|Lord Dalhousie|Lord Curzon|Lord Ripon|Bentinck banned it with the support of Raja Ram Mohan Roy.
+The Non-Cooperation Movement was called off after the incident at|Chauri Chaura|Jallianwala Bagh|Dandi|Champaran|Chauri Chaura, 1922.
+The Simon Commission came to India in|1928|1919|1930|1935|It was met with the slogan "Simon Go Back".
+The demand for Purna Swaraj was adopted at which Congress session?|Lahore, 1929|Calcutta, 1920|Karachi, 1931|Bombay, 1942|Lahore session, 1929, under Jawaharlal Nehru.
+Mahatma Gandhi returned to India from South Africa in|1915|1905|1919|1920|9 January 1915. It is marked as Pravasi Bharatiya Divas.
+Gandhi's first satyagraha in India was at|Champaran|Kheda|Dandi|Bardoli|Champaran in Bihar, 1917, for indigo farmers.
+Gautama Buddha was born at|Lumbini|Bodh Gaya|Sarnath|Kushinagar|Born Lumbini, enlightenment Bodh Gaya, first sermon Sarnath, death Kushinagar.
+Gautama Buddha gave his first sermon at|Sarnath|Bodh Gaya|Lumbini|Kushinagar|Born Lumbini, enlightenment Bodh Gaya, first sermon Sarnath, death Kushinagar.
+Gautama Buddha attained enlightenment at|Bodh Gaya|Sarnath|Lumbini|Rajgir|Born Lumbini, enlightenment Bodh Gaya, first sermon Sarnath.
+Mahavira was which Tirthankara of Jainism?|24th|1st|23rd|22nd|Rishabhanatha was the first. Mahavira was the 24th and last.
+The Battle of Haldighati (1576) was fought between Akbar and|Maharana Pratap|Rana Sanga|Hemu|Shivaji|Akbar's army fought Maharana Pratap of Mewar.
+Who built the Taj Mahal?|Shah Jahan|Akbar|Jahangir|Aurangzeb|Shah Jahan built it at Agra for Mumtaz Mahal.
+Who built the Red Fort in Delhi?|Shah Jahan|Akbar|Humayun|Aurangzeb|Shah Jahan built the Red Fort and the Jama Masjid.
+Vasco da Gama reached Calicut in|1498|1492|1510|1600|He found the sea route to India in 1498.
+Who is called the Napoleon of India?|Samudragupta|Chandragupta Maurya|Ashoka|Harshavardhana|Samudragupta of the Gupta dynasty, for his conquests.
+The poet Kalidasa lived in the court of|Chandragupta II|Ashoka|Harshavardhana|Akbar|Chandragupta II (Vikramaditya) of the Gupta dynasty.
+Shivaji was crowned Chhatrapati in|1674|1627|1680|1707|Crowned at Raigad in 1674.
+Who founded Sikhism?|Guru Nanak|Guru Gobind Singh|Guru Arjan Dev|Guru Tegh Bahadur|Guru Nanak was the first Sikh Guru.
+Who founded the Khalsa in 1699?|Guru Gobind Singh|Guru Nanak|Guru Tegh Bahadur|Guru Arjan Dev|Guru Gobind Singh, the tenth Guru.
+Netaji Subhas Chandra Bose hoisted the national flag at Port Blair in|1943|1942|1945|1947|30 December 1943. He named the islands Shaheed and Swaraj.
+Which is the oldest Veda?|Rigveda|Samaveda|Yajurveda|Atharvaveda|The Rigveda is the oldest of the four Vedas.
+Who deciphered the inscriptions of Ashoka?|James Prinsep|Alexander Cunningham|William Jones|Max Muller|James Prinsep read the Brahmi script in 1837.
+The capital of British India was shifted from Calcutta to Delhi in|1911|1905|1931|1857|Announced at the Delhi Durbar of 1911.
+In the Second Battle of Tarain (1192), Prithviraj Chauhan was defeated by|Muhammad Ghori|Mahmud of Ghazni|Qutb-ud-din Aibak|Babur|Prithviraj won in 1191 and lost in 1192.
+The Rowlatt Act was passed in|1919|1909|1929|1935|The protests against it led to the Jallianwala Bagh massacre.
+Who was the first Indian Governor-General of free India?|C. Rajagopalachari|Rajendra Prasad|Jawaharlal Nehru|Sardar Patel|He followed Lord Mountbatten in 1948.`),
+geo:Lq(`Which is the longest river in India?|Ganga|Godavari|Yamuna|Narmada|Ganga is the longest. Godavari is the longest in South India.
+The Tropic of Cancer passes through how many Indian states?|8|6|7|9|Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram.
+Which is the largest state of India by area?|Rajasthan|Madhya Pradesh|Maharashtra|Uttar Pradesh|Largest by area: Rajasthan. Smallest: Goa.
+Which is the smallest state of India by area?|Goa|Sikkim|Tripura|Kerala|Largest by area: Rajasthan. Smallest: Goa.
+India's only active volcano is on|Barren Island|Narcondam Island|Swaraj Dweep|Minicoy Island|Barren Island in the Andaman Sea is active. Narcondam is dormant.
+The southernmost point of India is|Indira Point|Kanyakumari|Point Calimere|Rameswaram|Indira Point is on Great Nicobar. Kanyakumari is the tip of the mainland.
+Which channel separates the Andaman Islands from the Nicobar Islands?|Ten Degree Channel|Duncan Passage|Palk Strait|Nine Degree Channel|Ten Degree Channel: Andaman and Nicobar.
+Which passage separates South Andaman from Little Andaman?|Duncan Passage|Ten Degree Channel|Coco Channel|Palk Strait|Duncan Passage: South Andaman and Little Andaman.
+Which channel separates the Andaman Islands from Myanmar's Coco Islands?|Coco Channel|Ten Degree Channel|Duncan Passage|Eight Degree Channel|The Coco Channel lies north of North Andaman.
+Which is the largest planet in the solar system?|Jupiter|Saturn|Earth|Neptune|Jupiter is the largest. Mercury is the smallest.
+Black soil is best suited for growing|Cotton|Tea|Rice|Jute|Black soil of the Deccan is called black cotton soil.
+The Standard Meridian of India is|82°30′ E|80°30′ E|77°30′ E|88°30′ E|It passes near Mirzapur. IST is 5 hours 30 minutes ahead of GMT.
+Which river is called the Sorrow of Bihar?|Kosi|Damodar|Gandak|Son|Kosi floods Bihar. Damodar was the Sorrow of Bengal.
+Saddle Peak, the highest point of the Andaman and Nicobar Islands, is in|North Andaman|South Andaman|Great Nicobar|Little Andaman|Saddle Peak is about 732 m high.
+Which is the largest freshwater lake in India?|Wular Lake|Chilika Lake|Sambhar Lake|Dal Lake|Wular is freshwater. Chilika is brackish. Sambhar is salty.
+Which is the largest brackish water lagoon in India?|Chilika Lake|Wular Lake|Pulicat Lake|Loktak Lake|Chilika is in Odisha.
+How many districts are there in the Andaman and Nicobar Islands?|3|2|4|5|North and Middle Andaman, South Andaman, and Nicobar.
+Havelock Island has been renamed as|Swaraj Dweep|Shaheed Dweep|Netaji Subhas Chandra Bose Dweep|Sri Vijaya Puram|Havelock = Swaraj Dweep. Neil = Shaheed Dweep. Ross = Netaji Subhas Chandra Bose Dweep.
+Neil Island has been renamed as|Shaheed Dweep|Swaraj Dweep|Netaji Subhas Chandra Bose Dweep|Sri Vijaya Puram|Havelock = Swaraj Dweep. Neil = Shaheed Dweep. Ross = Netaji Subhas Chandra Bose Dweep.
+Which river is called Dakshin Ganga?|Godavari|Krishna|Kaveri|Mahanadi|Godavari is the longest river of peninsular India.
+The Brahmaputra is known in Tibet as|Tsangpo|Dihang|Jamuna|Meghna|Tsangpo in Tibet, Dihang in Arunachal, Jamuna in Bangladesh.
+The Ganga rises from which glacier?|Gangotri|Siachen|Zemu|Pindari|It starts as the Bhagirathi from Gangotri glacier.
+Which river flows westward into the Arabian Sea?|Narmada|Godavari|Krishna|Mahanadi|Narmada and Tapi flow west. Most peninsular rivers flow east.
+The Hirakud Dam is built on which river?|Mahanadi|Godavari|Krishna|Sutlej|Hirakud in Odisha is the longest dam in India.
+The Bhakra Nangal Dam is built on which river?|Sutlej|Beas|Ravi|Yamuna|Bhakra Nangal is on the Sutlej.
+The Tehri Dam is in which state?|Uttarakhand|Himachal Pradesh|Punjab|Odisha|Tehri on the Bhagirathi is the highest dam in India.
+The Sardar Sarovar Dam is built on which river?|Narmada|Tapi|Sabarmati|Mahi|Sardar Sarovar is on the Narmada in Gujarat.
+Which strait separates India from Sri Lanka?|Palk Strait|Strait of Malacca|Ten Degree Channel|Bering Strait|The Palk Strait lies between Tamil Nadu and Sri Lanka.
+Kangchenjunga peak is in which state?|Sikkim|Uttarakhand|Arunachal Pradesh|Himachal Pradesh|It stands on the Sikkim–Nepal border.
+The Thar Desert is mainly in which state?|Rajasthan|Gujarat|Haryana|Punjab|The Thar is also called the Great Indian Desert.
+With which country does India share its longest land border?|Bangladesh|China|Pakistan|Nepal|The border with Bangladesh is the longest.
+Which state is the largest producer of coffee in India?|Karnataka|Kerala|Tamil Nadu|Assam|Coffee: Karnataka. Tea: Assam. Rubber: Kerala.
+Which state is the largest producer of tea in India?|Assam|West Bengal|Kerala|Karnataka|Coffee: Karnataka. Tea: Assam. Rubber: Kerala.
+Which state is the largest producer of natural rubber in India?|Kerala|Karnataka|Assam|Tamil Nadu|Coffee: Karnataka. Tea: Assam. Rubber: Kerala.
+Which state is the largest producer of jute in India?|West Bengal|Bihar|Assam|Odisha|Jute grows in the Ganga delta of West Bengal.
+In which Indian state does the sun rise first?|Arunachal Pradesh|Assam|Nagaland|Sikkim|Arunachal Pradesh is the easternmost state.
+What is the capital of Lakshadweep?|Kavaratti|Minicoy|Agatti|Kochi|Lakshadweep is a group of coral islands.
+Which planet is called the Red Planet?|Mars|Venus|Jupiter|Mercury|Iron oxide on its surface makes Mars look red.
+Which is the hottest planet?|Venus|Mercury|Mars|Jupiter|Venus is hotter than Mercury because of its thick atmosphere.
+Which planet is nearest to the Sun?|Mercury|Venus|Earth|Mars|Order: Mercury, Venus, Earth, Mars.
+Which planet has the most prominent rings?|Saturn|Jupiter|Uranus|Mars|Saturn is known for its rings.
+The longest day in the Northern Hemisphere is|21 June|21 March|23 September|22 December|21 June is the summer solstice. 22 December is the shortest day.
+Which is the largest ocean?|Pacific Ocean|Atlantic Ocean|Indian Ocean|Arctic Ocean|The Pacific is the largest and deepest ocean.
+Which is the largest continent?|Asia|Africa|Europe|North America|Asia is the largest. Australia is the smallest.
+Which is the largest country in the world by area?|Russia|Canada|China|USA|Russia is the largest. Vatican City is the smallest.
+The ozone layer is found in the|Stratosphere|Troposphere|Mesosphere|Thermosphere|The ozone layer in the stratosphere blocks ultraviolet rays.
+The Tropic of Cancer is at|23.5° North|23.5° South|66.5° North|0°|Cancer is 23.5° N. Capricorn is 23.5° S. The Equator is 0°.
+How many states are there in India?|28|29|27|30|India has 28 states and 8 union territories.
+How many union territories are there in India?|8|7|9|6|India has 28 states and 8 union territories.
+The Sundarbans delta is formed by the Ganga and the|Brahmaputra|Yamuna|Mahanadi|Godavari|It is the largest delta in the world and is known for mangroves.
+Which soil is the most widespread in India?|Alluvial soil|Black soil|Red soil|Laterite soil|Alluvial soil covers the northern plains.
+Silent Valley National Park is in|Kerala|Karnataka|Tamil Nadu|Assam|Silent Valley is in the Palakkad district of Kerala.`),
+sci:[].concat(
+pairs(tb('force=Newton;work and energy=Joule;power=Watt;pressure=Pascal;electric current=Ampere;electrical resistance=Ohm;frequency=Hertz;temperature=Kelvin;electric charge=Coulomb;potential difference=Volt;length=Metre;mass=Kilogram'),x=>`What is the SI unit of ${x}?`,(x,y)=>`The SI unit of ${x} is the ${y.toLowerCase()}.`),
+pairs(tb('atmospheric pressure=Barometer;earthquakes=Seismograph;humidity=Hygrometer;electric current=Ammeter;the purity of milk=Lactometer;temperature=Thermometer;blood pressure=Sphygmomanometer;wind speed=Anemometer;rainfall=Rain gauge;altitude=Altimeter;potential difference=Voltmeter'),x=>`Which instrument is used to measure ${x}?`,(x,y)=>`${y} measures ${x}.`),
+pairs(tb('Vitamin A=Night blindness;Vitamin B1=Beriberi;Vitamin C=Scurvy;Vitamin D=Rickets;Vitamin K=Slow clotting of blood;iodine=Goitre;iron=Anaemia;insulin=Diabetes'),x=>`Deficiency of ${x} causes`,(x,y)=>`Lack of ${x} causes ${y.toLowerCase()}. Learn the list: A night blindness, B1 beriberi, C scurvy, D rickets, K clotting.`),
+pairs(tb('common salt=Sodium chloride;baking soda=Sodium bicarbonate;washing soda=Sodium carbonate;laughing gas=Nitrous oxide;dry ice=Solid carbon dioxide;marsh gas=Methane;vinegar=Acetic acid;caustic soda=Sodium hydroxide;quicklime=Calcium oxide;limestone=Calcium carbonate;bleaching powder=Calcium hypochlorite;blue vitriol=Copper sulphate'),x=>`The chemical name of ${x} is`,(x,y)=>`${cap(x)} is ${y.toLowerCase()}.`),
+pairs(tb('penicillin=Alexander Fleming;X-rays=Wilhelm Roentgen;the telephone=Alexander Graham Bell;the electric bulb=Thomas Edison;the radio=Guglielmo Marconi;the law of gravitation=Isaac Newton;radioactivity=Henri Becquerel;the electron=J. J. Thomson;the theory of relativity=Albert Einstein;dynamite=Alfred Nobel;the smallpox vaccine=Edward Jenner'),x=>`Who discovered or invented ${x}?`,(x,y)=>`${y} is credited with ${x}.`),
+Lq(`Which part of the cell is called its powerhouse?|Mitochondria|Nucleus|Ribosome|Chloroplast|Mitochondria release energy. The nucleus is the control centre.
+The pH of pure water is|7|0|1|14|7 is neutral. Below 7 is acid. Above 7 is base.
+Which gas is most abundant in the Earth's atmosphere?|Nitrogen|Oxygen|Carbon dioxide|Argon|Nitrogen about 78%, oxygen about 21%.
+Which is the hardest natural substance?|Diamond|Iron|Graphite|Quartz|Diamond is a form of carbon.
+Which gas do plants release during photosynthesis?|Oxygen|Carbon dioxide|Nitrogen|Hydrogen|Plants take in carbon dioxide and release oxygen.
+The chemical symbol of gold is|Au|Ag|Gd|Go|Au from Latin aurum. Ag is silver.
+The chemical symbol of iron is|Fe|Ir|In|Fr|Fe from Latin ferrum.
+The chemical symbol of sodium is|Na|So|Sd|S|Na from Latin natrium.
+Which is the largest organ of the human body?|Skin|Liver|Heart|Lungs|Skin is the largest organ. The liver is the largest gland.
+Which blood group is called the universal donor?|O negative|AB positive|A positive|B negative|O negative can be given to anyone.
+Which blood group is called the universal recipient?|AB positive|O negative|A positive|B positive|AB positive can receive from anyone.
+Which organ produces insulin?|Pancreas|Liver|Kidney|Stomach|Insulin from the pancreas controls blood sugar.
+How many bones are there in the adult human body?|206|208|212|300|An adult has 206 bones. A baby has about 300.
+How many chambers does the human heart have?|4|2|3|5|Two atria and two ventricles.
+Which is the longest bone in the human body?|Femur|Tibia|Humerus|Spine|The femur is the thigh bone.
+Which is the smallest bone in the human body?|Stapes|Femur|Radius|Patella|The stapes is in the middle ear.
+Which is the largest gland in the human body?|Liver|Pancreas|Thyroid|Kidney|The liver is the largest gland.
+Red blood cells get their colour from|Haemoglobin|Chlorophyll|Melanin|Plasma|Haemoglobin contains iron and carries oxygen.
+Which blood cells fight infection?|White blood cells|Red blood cells|Platelets|Plasma|White cells fight germs. Platelets clot blood.
+Which blood cells help in clotting?|Platelets|White blood cells|Red blood cells|Plasma|White cells fight germs. Platelets clot blood.
+The green colour of leaves is due to|Chlorophyll|Haemoglobin|Carotene|Melanin|Chlorophyll traps sunlight. It contains magnesium.
+Malaria is spread by the|Female Anopheles mosquito|Male Anopheles mosquito|Aedes mosquito|Housefly|Malaria: female Anopheles. Dengue: Aedes.
+Dengue is spread by the|Aedes mosquito|Anopheles mosquito|Housefly|Tsetse fly|Malaria: female Anopheles. Dengue: Aedes.
+The BCG vaccine protects against|Tuberculosis|Polio|Tetanus|Measles|BCG is given to babies against tuberculosis.
+The chemical formula of water is|H₂O|CO₂|H₂O₂|HO|Two atoms of hydrogen and one of oxygen.
+The acid present in lemon is|Citric acid|Acetic acid|Lactic acid|Tartaric acid|Lemon citric, vinegar acetic, curd lactic, tamarind tartaric.
+The acid present in curd is|Lactic acid|Citric acid|Acetic acid|Formic acid|Lemon citric, vinegar acetic, curd lactic.
+The acid present in the stomach is|Hydrochloric acid|Sulphuric acid|Nitric acid|Acetic acid|Hydrochloric acid helps digestion.
+Which is the lightest gas?|Hydrogen|Helium|Oxygen|Nitrogen|Hydrogen is the lightest element.
+Which metal is liquid at room temperature?|Mercury|Sodium|Zinc|Lead|Mercury is the only liquid metal. Bromine is the liquid non-metal.
+Which non-metal is liquid at room temperature?|Bromine|Chlorine|Iodine|Sulphur|Mercury is the liquid metal. Bromine is the liquid non-metal.
+Brass is an alloy of copper and|Zinc|Tin|Iron|Nickel|Brass = copper + zinc. Bronze = copper + tin.
+Bronze is an alloy of copper and|Tin|Zinc|Lead|Iron|Brass = copper + zinc. Bronze = copper + tin.
+Iron is coated with which metal in galvanisation?|Zinc|Tin|Copper|Nickel|A zinc coat stops iron from rusting.
+An acid turns blue litmus|Red|Green|Yellow|Colourless|Acid turns blue litmus red. Base turns red litmus blue.
+Sound travels fastest in|Solids|Liquids|Gases|Vacuum|Sound is fastest in solids and cannot travel in a vacuum.
+A light year is a unit of|Distance|Time|Speed|Light intensity|It is the distance light travels in one year.
+Which lens is used to correct short-sightedness (myopia)?|Concave lens|Convex lens|Cylindrical lens|Bifocal lens|Myopia concave. Hypermetropia convex.
+Which lens is used to correct long-sightedness (hypermetropia)?|Convex lens|Concave lens|Cylindrical lens|Plane glass|Myopia concave. Hypermetropia convex.
+Which mirror is used as a rear-view mirror in vehicles?|Convex mirror|Concave mirror|Plane mirror|Cylindrical mirror|A convex mirror gives a wider view.
+Which mirror do dentists use?|Concave mirror|Convex mirror|Plane mirror|Cylindrical mirror|A concave mirror gives a larger image of the tooth.
+Newton's first law of motion is also called the law of|Inertia|Momentum|Action and reaction|Gravitation|A body stays at rest or in motion unless a force acts.
+A rocket works on which law of motion?|Newton's third law|Newton's first law|Newton's second law|Law of gravitation|Every action has an equal and opposite reaction.
+The value of acceleration due to gravity on Earth is about|9.8 m/s²|8.9 m/s²|10.8 m/s²|6.7 m/s²|g is about 9.8 m/s².
+The kilowatt-hour is a unit of|Energy|Power|Current|Voltage|One unit of electricity = 1 kilowatt-hour.
+Which is the best conductor of electricity?|Silver|Copper|Gold|Aluminium|Silver is the best. Copper is used because it is cheaper.
+Which gas is filled in electric bulbs?|Argon|Oxygen|Hydrogen|Carbon dioxide|An inert gas like argon stops the filament burning.
+The most abundant metal in the Earth's crust is|Aluminium|Iron|Copper|Calcium|Most abundant element: oxygen. Most abundant metal: aluminium.
+The normal temperature of the human body is about|37 °C|27 °C|40 °C|32 °C|37 °C is the same as 98.6 °F.
+At which temperature are the Celsius and Fahrenheit scales equal?|−40°|0°|32°|100°|−40 °C = −40 °F.
+The atomic number of carbon is|6|12|8|14|Hydrogen 1, carbon 6, nitrogen 7, oxygen 8.
+The atomic number of oxygen is|8|16|6|7|Hydrogen 1, carbon 6, nitrogen 7, oxygen 8.
+The main gas in LPG is|Butane|Methane|Ethane|Hydrogen|LPG is mainly butane and propane. CNG is mainly methane.
+The main gas in CNG is|Methane|Butane|Propane|Hydrogen|LPG is mainly butane and propane. CNG is mainly methane.
+The chemical formula of ozone is|O₃|O₂|CO₂|H₂O|Ozone has three oxygen atoms.`)),
+stat:[].concat(
+pairs(tb('Kathakali=Kerala;Mohiniyattam=Kerala;Bharatanatyam=Tamil Nadu;Kuchipudi=Andhra Pradesh;Odissi=Odisha;Kathak=Uttar Pradesh;Manipuri=Manipur;Sattriya=Assam;Bhangra=Punjab;Garba=Gujarat;Ghoomar=Rajasthan;Lavani=Maharashtra;Bihu=Assam;Yakshagana=Karnataka'),x=>`${x} is a dance form of which state?`,(x,y)=>`${x} belongs to ${y}.`),
+pairs(tb('Kaziranga=Assam;Jim Corbett=Uttarakhand;Gir=Gujarat;Kanha=Madhya Pradesh;Bandhavgarh=Madhya Pradesh;Ranthambore=Rajasthan;Sundarbans=West Bengal;Periyar=Kerala;Bandipur=Karnataka;Keoladeo=Rajasthan;Simlipal=Odisha;Manas=Assam;Tadoba=Maharashtra;Dachigam=Jammu and Kashmir;Valley of Flowers=Uttarakhand;Mahatma Gandhi Marine=Andaman and Nicobar Islands'),x=>`${x} National Park is in`,(x,y)=>`${x} National Park is in ${y}.`),
+pairs(CUR,x=>`What is the currency of ${x}?`,(x,y)=>`The currency of ${x} is the ${y.toLowerCase()}.`),
+pairs(CAP,x=>`What is the capital of ${x}?`,(x,y)=>`The capital of ${x} is ${y}.`),
+pairs(SCAP,x=>`What is the capital of ${x}?`,(x,y)=>`The capital of ${x} is ${y}.`),
+pairs(tb("World Environment Day=5 June;Earth Day=22 April;International Yoga Day=21 June;World Health Day=7 April;National Science Day=28 February;Teachers' Day in India=5 September;Children's Day in India=14 November;World AIDS Day=1 December;Human Rights Day=10 December;World Water Day=22 March;International Women's Day=8 March;National Youth Day=12 January;Hindi Diwas=14 September;World Population Day=11 July;World Ozone Day=16 September;National Sports Day=29 August;World Tourism Day=27 September;National Voters' Day=25 January;World No Tobacco Day=31 May;Engineers' Day in India=15 September"),x=>`${x} is observed on`,(x,y)=>`${x} is on ${y}.`),
+pairs(tb('Ranji Trophy=Cricket;Duleep Trophy=Cricket;Santosh Trophy=Football;Durand Cup=Football;Subroto Cup=Football;Davis Cup=Tennis;Wimbledon=Tennis;Thomas Cup=Badminton;Uber Cup=Badminton;Agha Khan Cup=Hockey;Ryder Cup=Golf'),x=>`The ${x} is associated with which sport?`,(x,y)=>`The ${x} is a ${y.toLowerCase()} event.`),
+pairs(tb('the Reserve Bank of India=Mumbai;ISRO=Bengaluru;the United Nations=New York;the World Health Organization=Geneva;UNESCO=Paris;the World Bank=Washington D.C.;SAARC=Kathmandu;ASEAN=Jakarta;the International Court of Justice=The Hague;the Food and Agriculture Organization=Rome;DRDO=New Delhi'),x=>`The headquarters of ${x} is in`,(x,y)=>`The headquarters of ${x} is in ${y}.`),
+pairs(tb('Bihu=Assam;Onam=Kerala;Pongal=Tamil Nadu;Baisakhi=Punjab;The Hornbill Festival=Nagaland;Ganesh Chaturthi=Maharashtra;Durga Puja=West Bengal;Chhath=Bihar;Bathukamma=Telangana;The Pushkar Fair=Rajasthan;Rann Utsav=Gujarat'),x=>`${x} is mainly celebrated in`,(x,y)=>`${x} is mainly celebrated in ${y}.`),
+pairs(tb('Iron Man of India=Sardar Vallabhbhai Patel;Missile Man of India=A. P. J. Abdul Kalam;Nightingale of India=Sarojini Naidu;Flying Sikh=Milkha Singh;Father of the Nation=Mahatma Gandhi;Netaji=Subhas Chandra Bose;Lokmanya=Bal Gangadhar Tilak;Frontier Gandhi=Khan Abdul Ghaffar Khan;Punjab Kesari=Lala Lajpat Rai;Deshbandhu=Chittaranjan Das;Grand Old Man of India=Dadabhai Naoroji;Gurudev=Rabindranath Tagore'),x=>`Who is known as "${x}"?`,(x,y)=>`${y} is known as ${x}.`),
+pairs(tb('The Discovery of India=Jawaharlal Nehru;Wings of Fire=A. P. J. Abdul Kalam;Gitanjali=Rabindranath Tagore;My Experiments with Truth=Mahatma Gandhi;Arthashastra=Kautilya;Anandamath=Bankim Chandra Chatterjee;Ramayana=Valmiki;Mahabharata=Ved Vyasa;Godan=Premchand;Malgudi Days=R. K. Narayan;Abhijnanashakuntalam=Kalidasa;Indica=Megasthenes;Ain-i-Akbari=Abul Fazl;Panchatantra=Vishnu Sharma'),x=>`Who wrote "${x}"?`,(x,y)=>`"${x}" was written by ${y}.`),
+Lq(`Who was the first woman of Indian origin to go to space?|Kalpana Chawla|Sunita Williams|Valentina Tereshkova|Sirisha Bandla|Kalpana Chawla flew in 1997.
+Who was the first Indian to go to space?|Rakesh Sharma|Kalpana Chawla|Sunita Williams|Shubhanshu Shukla|Rakesh Sharma flew in 1984.
+Who wrote the national song Vande Mataram?|Bankim Chandra Chatterjee|Rabindranath Tagore|Sarojini Naidu|Muhammad Iqbal|National song: Bankim Chandra. National anthem: Tagore.
+Who wrote the national anthem Jana Gana Mana?|Rabindranath Tagore|Bankim Chandra Chatterjee|Sarojini Naidu|Subramania Bharati|National song: Bankim Chandra. National anthem: Tagore.
+Who was the first woman Prime Minister of India?|Indira Gandhi|Sarojini Naidu|Pratibha Patil|Sucheta Kripalani|Indira Gandhi became Prime Minister in 1966.
+Who was the first woman President of India?|Pratibha Patil|Indira Gandhi|Droupadi Murmu|Sarojini Naidu|Pratibha Patil, 2007 to 2012.
+Who was the first Indian to win a Nobel Prize?|Rabindranath Tagore|C. V. Raman|Mother Teresa|Amartya Sen|Tagore won the Literature prize in 1913.
+Which is the highest civilian award of India?|Bharat Ratna|Padma Vibhushan|Padma Bhushan|Param Vir Chakra|Bharat Ratna is the highest civilian award.
+Which is the highest military award of India?|Param Vir Chakra|Ashoka Chakra|Maha Vir Chakra|Bharat Ratna|Param Vir Chakra is the highest wartime gallantry award.
+The Dadasaheb Phalke Award is given in the field of|Cinema|Literature|Sports|Science|It is India's highest award in cinema.
+The Jnanpith Award is given in the field of|Literature|Cinema|Music|Sports|Jnanpith is the highest literary award in India.
+The Arjuna Award is given in the field of|Sports|Literature|Cinema|Science|Arjuna for players. Dronacharya for coaches.
+The Dronacharya Award is given to|Sports coaches|Players|Writers|Scientists|Arjuna for players. Dronacharya for coaches.
+Who won India's first individual Olympic gold medal?|Abhinav Bindra|Neeraj Chopra|Leander Paes|P. V. Sindhu|Abhinav Bindra, shooting, Beijing 2008.
+What is the national animal of India?|Tiger|Lion|Elephant|Leopard|The Royal Bengal tiger.
+What is the national bird of India?|Peacock|Parrot|Swan|Eagle|The Indian peacock.
+What is the national flower of India?|Lotus|Rose|Jasmine|Marigold|The lotus.
+What is the national tree of India?|Banyan|Peepal|Neem|Mango|The banyan.
+What is the national aquatic animal of India?|Ganges river dolphin|Blue whale|Olive ridley turtle|Dugong|The Ganges river dolphin.
+What is the national fruit of India?|Mango|Banana|Apple|Jackfruit|The mango.
+What is the state animal of the Andaman and Nicobar Islands?|Dugong|Saltwater crocodile|Elephant|Wild pig|The dugong is also called the sea cow.
+What is the state bird of the Andaman and Nicobar Islands?|Andaman wood pigeon|Nicobar pigeon|Hornbill|Peacock|The Andaman wood pigeon.
+What is the state tree of the Andaman and Nicobar Islands?|Andaman padauk|Coconut|Mangrove|Teak|The Andaman padauk.
+How many players are there in a cricket team on the field?|11|9|10|12|Cricket, football and hockey all have 11 players a side.
+How many players are there in a kabaddi team on the court?|7|5|9|11|Seven players a side.
+The term "Grand Slam" is associated with|Tennis|Cricket|Hockey|Chess|Australian Open, French Open, Wimbledon and US Open.
+The Olympic Games are held every|4 years|2 years|3 years|5 years|The five rings stand for five continents.`))
+};
+
+/* ---------- topics and lessons ---------- */
+const SUB={quant:'Maths',reason:'Reasoning',eng:'English',ga:'General Awareness'};
+const T=[
+{id:'pct',s:'quant',n:'Percentage',lv:'Very easy',b:['Percent means "out of 100". 25% is 25 out of 100, which is 1/4.','To find x% of a number, multiply the number by x and divide by 100.','Increase by x% means add x% of the number to itself.'],k:['10% = move the decimal one place left. 10% of 460 = 46.','5% is half of 10%. 1% is one tenth of 10%. Build any percent from these.','Learn the fractions: 50% = 1/2, 25% = 1/4, 20% = 1/5, 12.5% = 1/8, 75% = 3/4.','Increase by 20% = multiply by 1.2. Decrease by 20% = multiply by 0.8.']},
+{id:'pl',s:'quant',n:'Profit, Loss and Discount',lv:'Easy',b:['Cost price (CP) is what you pay. Selling price (SP) is what you get.','SP more than CP is profit. SP less than CP is loss.','Profit % and loss % are always calculated on CP.','Discount is always calculated on the marked price (MP).'],k:['Profit % = (SP − CP) ÷ CP × 100.','Profit of 25% means SP = CP × 1.25. Loss of 20% means SP = CP × 0.8.','Discount of 15% means SP = MP × 0.85.']},
+{id:'si',s:'quant',n:'Simple and Compound Interest',lv:'Easy',b:['Interest is the extra money paid for using someone\'s money.','Simple interest = P × R × T ÷ 100. P is the principal, R the yearly rate, T the years.','Amount = principal + interest.','In compound interest you also earn interest on last year\'s interest.'],k:['Find one year\'s interest (R% of P) first, then multiply by the years.','Compound interest for 2 years: effective rate = 2R + R²/100. For 10% it is 21%. For 20% it is 44%.','For 2 years, CI − SI = P × (R/100)².']},
+{id:'ratio',s:'quant',n:'Ratio and Proportion',lv:'Very easy',b:['A ratio a : b compares two quantities. 2 : 3 means 2 parts of the first for every 3 parts of the second.','Total parts = a + b.','Value of one part = total ÷ total parts.'],k:['Always find the value of one part first, then multiply.','If one share is given, divide it by its number of parts to get one part.']},
+{id:'avg',s:'quant',n:'Average',lv:'Very easy',b:['Average = sum of all values ÷ number of values.','So sum = average × number of values. This form solves most questions.'],k:['Deviation method: guess an average. If the differences from your guess add up to 0, the guess is right.','When a number is added: new number = new average + (old count × change in average).']},
+{id:'work',s:'quant',n:'Time and Work',lv:'Easy',b:['If A finishes a job in 10 days, A does 1/10 of the job each day.','To combine people, add the work they do in one day.'],k:['LCM method: take total work = LCM of the days. Each person\'s daily work becomes a whole number.','Two people together: days = (a × b) ÷ (a + b).']},
+{id:'sdt',s:'quant',n:'Speed, Distance and Time',lv:'Easy',b:['Speed = distance ÷ time. Distance = speed × time. Time = distance ÷ speed.','Keep units the same: km with hours, metres with seconds.'],k:['km/h to m/s: multiply by 5/18. m/s to km/h: multiply by 18/5.','Train crossing a pole: distance = length of the train. Crossing a platform: train + platform.','Handy values: 36 km/h = 10 m/s, 54 = 15, 72 = 20, 90 = 25.']},
+{id:'bod',s:'quant',n:'Simplification (BODMAS)',lv:'Very easy',b:['BODMAS gives the order: Brackets, Of, Division, Multiplication, Addition, Subtraction.','Division and multiplication come before addition and subtraction.','Division and multiplication have equal rank. Do them left to right.'],k:['First underline every × and ÷ part and solve those.','Then add and subtract from left to right.']},
+{id:'lcm',s:'quant',n:'LCM and HCF',lv:'Very easy',b:['HCF is the biggest number that divides both numbers.','LCM is the smallest number that both numbers divide into.'],k:['Find the HCF first. Write each number as HCF × something.','LCM = HCF × the two leftover numbers.','Check: HCF × LCM = product of the two numbers.']},
+{id:'ser',s:'reason',n:'Number Series',lv:'Very easy',b:['A series follows one rule. Find the rule, then apply it once more.','First step: write the gap between each pair of neighbours.'],k:['Same gap each time: add that gap.','Gaps growing steadily: the gap itself is a series.','Numbers growing very fast: check × 2, × 3, squares (1, 4, 9, 16, 25) or cubes (1, 8, 27, 64, 125).']},
+{id:'cod',s:'reason',n:'Coding and Decoding',lv:'Very easy',b:['Each letter is replaced using one rule. Find the rule from the example word.','Most common rule: every letter moves forward or back by the same number of steps.'],k:['Compare only the first letter and its code to get the shift. Check with the second letter.','Remember EJOTY: E = 5, J = 10, O = 15, T = 20, Y = 25.','Same letters in a different order means the word is reversed or rearranged.']},
+{id:'alp',s:'reason',n:'Alphabet Positions',lv:'Very easy',b:['A = 1, B = 2 ... Z = 26.','A letter\'s position from the left and from the right always add up to 27.'],k:['EJOTY: E = 5, J = 10, O = 15, T = 20, Y = 25. Count from the nearest one.','nth letter from the right = (27 − n)th letter from the left.','Opposite pairs: A–Z, B–Y, C–X ... M–N.']},
+{id:'dir',s:'reason',n:'Direction Sense',lv:'Easy',b:['Draw it. North is up, South is down, East is right, West is left.','Right turn = clockwise. Left turn = anticlockwise.'],k:['Clockwise order: North → East → South → West → North.','Two moves at a right angle: shortest distance = √(a² + b²).','Learn the triples: 3-4-5, 6-8-10, 5-12-13, 9-12-15, 8-15-17.']},
+{id:'rank',s:'reason',n:'Ranking and Order',lv:'Very easy',b:['Adding a person\'s position from the left and from the right counts that person twice.','So total = left + right − 1.'],k:['Position from the other end = total − position + 1.','Total = left position + right position − 1.']},
+{id:'ana',s:'reason',n:'Analogy',lv:'Very easy',b:['The first pair has a relationship. The second pair must have the same one.','Say the link as a sentence: "A doctor works in a hospital." Then repeat it for the second pair.'],k:['Common links: worker–workplace, tool–use, young one–parent, country–currency.','For numbers, test square, cube, × 2, or a fixed addition.','For letters, check how far each letter has moved.']},
+{id:'odd',s:'reason',n:'Odd One Out',lv:'Very easy',b:['Three options share a property. One does not.','Name the group the options belong to: fruits, primes, months with 31 days.'],k:['Numbers: check prime, even or odd, perfect square, multiples.','Letters: check the gap between letters.','Words: check the category first, then a finer property.']},
+{id:'blood',s:'reason',n:'Blood Relations',lv:'Easy',b:['Draw a small family tree as you read. Do not solve it in your head.','Take one relation at a time and add it to the tree.'],k:['"Only son of my father" is the speaker himself. "Only daughter of my mother" is the speaker herself.','Parent\'s brother = uncle. Parent\'s sister = aunt. Their child = cousin.','Mark males with + and females with − in your sketch.']},
+{id:'syn',s:'eng',n:'Synonyms',lv:'Easy',b:['A synonym is a word with the same or nearly the same meaning.'],k:['Put the option in a sentence in place of the word. If the meaning stays the same, it is right.','Strike out options that are opposite in meaning first.','Learn five words a day from previous papers. They repeat.']},
+{id:'ant',s:'eng',n:'Antonyms',lv:'Easy',b:['An antonym is a word with the opposite meaning.'],k:['First say the meaning of the word in your own words, then look for its opposite.','Examiners put a synonym among the options as a trap. Strike it out.','Prefixes help: un-, in-, im-, dis- often make the opposite.']},
+{id:'idi',s:'eng',n:'Idioms and Phrases',lv:'Easy',b:['An idiom has a meaning different from the meaning of its words.','You cannot work it out word by word. You have to know it.'],k:['Strike out the option that is the literal meaning. It is almost never right.','Picture the idiom as a small scene. The picture makes it stick.','About 150 idioms repeat across SSC papers. Learn them from previous papers.']},
+{id:'ows',s:'eng',n:'One-word Substitution',lv:'Easy',b:['One word that replaces a whole phrase.','Most answers are built from Greek or Latin roots.'],k:['-phobia = fear, -phile = lover, -cide = killing, -logy = study of, -cracy = rule.','auto = self, poly = many, omni = all, bio = life, hydro = water.','Break the word into root + ending and the meaning appears.']},
+{id:'spl',s:'eng',n:'Spelling',lv:'Very easy',b:['One option is spelt correctly. The rest change a double letter or a vowel.'],k:['Look at double letters first: cc, mm, rr, ss, tt.','i before e, except after c: believe, but receive.','Break the word into parts and say each part: ac-com-mo-da-tion.']},
+{id:'gram',s:'eng',n:'Grammar and Fill in the Blanks',lv:'Easy',b:['The verb must agree with the subject: singular subject, singular verb.','Some words always take a fixed preposition.','Tense must match the time words in the sentence.'],k:['Each, either, neither, one of → singular verb.','Senior, junior, superior, inferior, prefer → "to", never "than".','Since + starting point (since 2010). For + length of time (for two years).','Passive voice: object first, then be + third form of the verb.']},
+{id:'pol',s:'ga',n:'Polity',lv:'Easy',b:['Polity questions come from the Constitution: Articles, Parts, ages, numbers and sources.','The same facts repeat every year.'],k:['Ages: Lok Sabha 25, Rajya Sabha 30, President 35.','Articles to know: 14 equality, 17 untouchability, 19 freedoms, 21 life, 32 remedies.','Sources: Fundamental Rights from USA, DPSP from Ireland, Parliament from Britain.']},
+{id:'his',s:'ga',n:'History',lv:'Easy',b:['Most questions ask who, when or where.','Group facts by period: Ancient, Medieval, Modern.'],k:['Freedom movement in gaps of ten years: 1920 Non-Cooperation, 1930 Civil Disobedience, 1942 Quit India.','Battles: Panipat 1526, Plassey 1757, Buxar 1764, Revolt 1857.','Make a one-page timeline and read it daily.']},
+{id:'geo',s:'ga',n:'Geography',lv:'Easy',b:['Questions come from rivers, soils, states, islands and the solar system.','Keep a map of India in front of you while learning.'],k:['Learn superlatives as pairs: largest and smallest, longest and highest.','Tropic of Cancer states, west to east: Gujarat, Rajasthan, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram.','Andaman facts often asked: Barren Island, Indira Point, Ten Degree Channel, Saddle Peak.']},
+{id:'sci',s:'ga',n:'General Science',lv:'Easy',b:['Class 6 to 10 science is enough.','Questions are on units, vitamins, the human body, common chemicals and gases.'],k:['Vitamins: A night blindness, B1 beriberi, C scurvy, D rickets.','Units: force newton, energy joule, power watt, current ampere.','pH: below 7 acid, 7 neutral, above 7 base.']},
+{id:'stat',s:'ga',n:'Static GK',lv:'Easy',b:['Static GK does not change: dances, parks, headquarters, days, currencies.','It is pure memory, so short daily revision works best.'],k:['Learn in pairs: dance and state, park and animal, country and currency.','Make lists of ten and revise one list a day.','Recall with your eyes closed. Recalling beats re-reading.']}
+];
+T.forEach(t=>{t.g=G[t.id]||null});
+const TM=Object.fromEntries(T.map(t=>[t.id,t]));
+TM.bod.n='Simplification and Quick Calculation';
+const MORE={bod:['a² − b² = (a − b)(a + b). So 37² − 33² = 4 × 70 = 280.','Square of a number ending in 5: for 35, do 3 × 4 = 12 and write 25 after it: 1225.','× 11: for 43 × 11 write 4, then 4 + 3, then 3: 473.'],avg:['Average of the first n natural numbers = (n + 1) ÷ 2.','When one person is replaced: new person = old person + (count × rise in average).'],sdt:['Same distance at two speeds: average speed = 2xy ÷ (x + y), never the simple average.'],work:['Workers × days stays the same. Double the workers, half the days.'],lcm:['"Ring together again" or "meet again" questions ask for the LCM.'],dir:['Morning sun is in the East, so shadows fall West. Evening sun is in the West, so shadows fall East.','Equal walks in opposite directions cancel each other.'],cod:['Opposite-letter code: A ↔ Z, B ↔ Y. The two positions add up to 27.'],ser:['Check for prime numbers (2, 3, 5, 7, 11, 13 ...) and for "add the last two" series.'],pl:['To get CP from SP and profit %: CP = SP × 100 ÷ (100 + profit %).']};
+for(const k in MORE)TM[k].k.push(...MORE[k]);
+const bySub=s=>T.filter(t=>t.s==s).map(t=>t.id);
+
+/* ---------- storage ---------- */
+const KEY='ssc_practice_desk_v1';
+let S={topic:{},hist:[],seen:{}};
+try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.topic&&r.hist)S=r}catch(e){}
+S.seen=S.seen||{};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const acc=st=>st&&st.a?Math.round(st.c/st.a*100):null;
+
+/* ---------- session building ---------- */
+const hsh=x=>{let h=0;for(let i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))|0;return h};
+function makeQ(tid,used){const t=TM[tid],seen=S.seen[tid]=S.seen[tid]||[];let o;
+  if(t.g){let k;for(let i=0;i<40;i++){o=t.g();k=hsh(o.q);if(!used.has(tid+k)&&!seen.includes(k))break}
+    for(let i=0;i<40&&used.has(tid+k);i++){o=t.g();k=hsh(o.q)}
+    if(used.has(tid+k))return null;
+    used.add(tid+k);seen.push(k);if(seen.length>300)seen.splice(0,seen.length-300)}
+  else{const pool=B[tid],free=pool.map((_,i)=>i).filter(i=>!used.has(tid+i));if(!free.length)return null;
+    let fresh=free.filter(i=>!seen.includes(i));if(!fresh.length){seen.length=0;fresh=free}
+    const i=P(fresh);used.add(tid+i);seen.push(i);const e=pool[i];o=mk(e.q,e.c,(e.f||[]).concat(sh(e.w)),e.sol)}
+  o.t=tid;o.s=t.s;o.sel=null;o.mark=false;return o}
+function buildPart(p,used){const out=[];let order=sh(p.topics),i=0,tries=0;
+  while(out.length<p.n&&tries<p.n*8){const q=makeQ(order[i%order.length],used);i++;tries++;
+    if(q){q.marks=p.marks;q.neg=p.neg;out.push(q)}}
+  return out}
+let view='practice',ses=null,res=null,tick=null,resetArm=false;
+function start(cfg){const used=new Set();let qs=[];cfg.parts.forEach(p=>{qs=qs.concat(buildPart(p,used))});
+  save();ses={label:cfg.label,mode:cfg.mode,qs,i:0,t0:Date.now(),limit:cfg.limit||0,confirm:false};
+  view='session';clearInterval(tick);
+  if(ses.limit) tick=setInterval(()=>{const el=document.getElementById('clock');const left=remain();if(left<=0){finish();return}if(el){el.textContent=mmss(left);el.classList.toggle('low',left<300)}},1000);
+  render();scrollTo(0,0)}
+const remain=()=>ses.limit-Math.floor((Date.now()-ses.t0)/1000);
+const mmss=s=>{s=Math.max(0,s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+function finish(){clearInterval(tick);const sub={};let sc=0,mx=0,c=0,w=0,sk=0;
+  for(const q of ses.qs){mx+=q.marks;sub[q.s]=sub[q.s]||[0,0];
+    if(q.sel==null){sk++;continue}
+    const st=S.topic[q.t]=S.topic[q.t]||{a:0,c:0};st.a++;sub[q.s][0]++;
+    if(q.sel==q.a){c++;sc+=q.marks;st.c++;sub[q.s][1]++}else{w++;sc-=q.neg}}
+  const secs=Math.floor((Date.now()-ses.t0)/1000);
+  const h={d:Date.now(),l:ses.label,m:ses.mode,sc,mx,c,w,s:sk,t:secs,sub};
+  if(c+w>0){S.hist.push(h);S.hist=S.hist.slice(-200);save()}
+  res={h,qs:ses.qs,label:ses.label};ses=null;view='result';render();scrollTo(0,0)}
+
+/* ---------- views ---------- */
+const app=document.getElementById('app');
+function hdr(){return `<header class="top"><div class="brand">SSC <i>Practice</i> Desk</div><nav>
+${[['practice','Practice'],['mock','Mock tests'],['progress','Progress']].map(([v,l])=>`<button data-a="go" data-v="${v}" aria-current="${view==v}">${l}</button>`).join('')}</nav></header>`}
+function statusChip(st){const a=acc(st);if(a==null)return '<span class="chip new">New</span>';
+  return a>=80?'<span class="chip good">Strong</span>':a>=50?'<span class="chip warn">Improving</span>':'<span class="chip bad">Weak</span>'}
+function vPractice(){let h=hdr()+`<div class="intro"><h1>Start with the topics that give marks fastest</h1>
+<p class="muted">${T.length} scoring topics for CGL, CHSL and MTS. Stuck on a question? Tap <b>Learn</b> for the basics, the shortcut and the worked answer.</p>
+<div class="row"><button class="btn pri" data-a="mixed">Mixed practice · 40 questions</button><button class="btn" data-a="go" data-v="mock">Take a mock test</button></div></div>`;
+  for(const s in SUB){const ids=bySub(s);let a=0,c=0;ids.forEach(i=>{const st=S.topic[i];if(st){a+=st.a;c+=st.c}});
+    h+=`<section class="topics"><div class="sub-head"><h2>${SUB[s]}</h2><span class="muted num">${a?Math.round(c/a*100)+'% correct · '+a+' done':'Not started'}</span><button class="btn sp" data-a="subj" data-v="${s}">Subject test · 20 Q</button></div>`;
+    for(const id of ids){const t=TM[id],st=S.topic[id];
+      h+=`<div class="topic"><div class="nm"><h3>${t.n}</h3><span class="muted num">${st?st.a+' done · '+acc(st)+'% correct':t.g?'New questions every time':B[id].length+' questions in the bank'}</span></div>
+<span class="chip">${t.lv}</span>${statusChip(st)}<button class="btn quiet" data-a="learn" data-v="${id}">Learn</button><button class="btn" data-a="topic" data-v="${id}">Practice</button></div>`}
+    h+='</section>'}
+  return h}
+const MOCKS={
+cgl:{label:'Mock: CGL / CHSL Tier 1 pattern',limit:3600,parts:[['reason',25,2,.5],['ga',25,2,.5],['quant',25,2,.5],['eng',25,2,.5]],info:'100 questions · 200 marks · 60 minutes · −0.5 for a wrong answer'},
+mts:{label:'Mock: MTS pattern',limit:5400,parts:[['quant',20,3,0],['reason',20,3,0],['ga',25,3,1],['eng',25,3,1]],info:'90 questions · 270 marks · 90 minutes · no negative marks in Maths and Reasoning, −1 in GA and English'},
+quick:{label:'Quick mock',limit:720,parts:[['reason',5,2,.5],['ga',5,2,.5],['quant',5,2,.5],['eng',5,2,.5]],info:'20 questions · 40 marks · 12 minutes · −0.5 for a wrong answer'}};
+function vMock(){return hdr()+`<div class="intro"><h1>Mock tests</h1><p class="muted">Timed like the real computer-based test. No answers are shown until you submit. Then every question opens with its solution and lesson.</p></div>
+<div class="cards">${Object.entries(MOCKS).map(([k,m])=>`<div class="card"><h3>${m.label.replace('Mock: ','')}</h3><p class="muted">${m.info}</p><div class="row"><button class="btn pri" data-a="mock" data-v="${k}">Start</button></div></div>`).join('')}</div>
+<p class="muted">Section sizes and marks follow the 2026 pattern. The real Tier 1 also locks each section to 15 minutes; here you get one clock for the whole paper. Maths and Reasoning questions are made fresh every time. English and General Awareness come from a bank, and a question you have already seen is held back until you have gone through the rest of that topic.</p>`}
+function qCard(q,i,rev){const done=rev||(ses&&ses.mode=='practice'&&q.sel!=null);
+  let h=`<p class="muted">${SUB[q.s]} · ${TM[q.t].n}</p><p class="qtext">${esc(q.q)}</p><div class="opts">`;
+  q.opts.forEach((o,k)=>{let cl='opt';if(done){if(k==q.a)cl+=' ok';else if(k==q.sel)cl+=' no'}else if(k==q.sel)cl+=' sel';
+    h+=`<button class="${cl}" ${done?'disabled':''} data-a="pick" data-v="${k}"><span class="bub">${'ABCD'[k]}</span><span>${esc(o)}</span></button>`});
+  h+='</div>';
+  if(done){const ok=q.sel==q.a;
+    h+=`<div class="fb ${ok?'':'no'}"><b>${q.sel==null?'Not answered.':ok?'Correct.':'Not quite.'} Answer: ${'ABCD'[q.a]} · ${esc(q.opts[q.a])}</b><span>${esc(q.sol)}</span></div>
+<div class="row"><button class="btn" data-a="learnq" data-v="${i}">Learn this from the basics</button></div>`}
+  return h}
+function vSession(){const q=ses.qs[ses.i],n=ses.qs.length,mock=ses.mode=='mock',last=ses.i==n-1;
+  let h=`<div class="bar"><div class="ttl">${esc(ses.label)}</div><span class="num">Q ${ses.i+1} / ${n}</span>${ses.limit?`<span class="clock" id="clock">${mmss(remain())}</span>`:''}<button class="btn quiet" data-a="quit">${mock?'Submit':'End'}</button></div>`;
+  if(ses.confirm){const un=ses.qs.filter(x=>x.sel==null).length;
+    h+=`<div class="card"><h3>${mock?'Submit the test now?':'End this practice set?'}</h3><p class="muted">${un} of ${n} questions are unanswered.</p><div class="row"><button class="btn pri" data-a="finish">${mock?'Submit':'End and see result'}</button><button class="btn" data-a="keep">Keep going</button></div></div>`}
+  h+=`<div class="card">${qCard(q,ses.i,false)}`;
+  if(!mock&&q.sel==null) h+=`<div class="row"><button class="btn" data-a="learnq" data-v="${ses.i}">Stuck? Learn it</button></div>`;
+  h+=`<div class="row">${mock||ses.i>0?`<button class="btn quiet" data-a="prev" ${ses.i==0?'disabled':''}>Previous</button>`:''}
+${mock?`<button class="btn quiet" data-a="mark">${q.mark?'Unmark':'Mark for review'}</button>`:''}
+${last?`<button class="btn pri" data-a="${mock?'quit':'finish'}">${mock?'Submit test':'Finish'}</button>`:`<button class="btn pri" data-a="next">${!mock&&q.sel==null?'Skip':'Next'}</button>`}</div></div>`;
+  if(mock) h+=`<div class="card"><div class="legend"><span class="a">Answered</span><span class="m">Marked for review</span><span>Not answered</span></div><div class="pal">${ses.qs.map((x,k)=>`<button class="${x.mark?'mk':x.sel!=null?'ans':''} ${k==ses.i?'cur':''}" data-a="jump" data-v="${k}">${k+1}</button>`).join('')}</div></div>`;
+  return h}
+function vResult(){const {h,qs}=res,p=Math.max(0,Math.round(h.sc/h.mx*100));
+  let o=hdr()+`<div class="intro"><p class="muted">${esc(res.label)}</p><h1>You scored ${+h.sc.toFixed(2)} out of ${h.mx}</h1></div>
+<div class="tiles"><div class="tile"><div class="v num">${p}%</div><div class="k">Score</div></div><div class="tile"><div class="v num">${h.c}</div><div class="k">Correct</div></div><div class="tile"><div class="v num">${h.w}</div><div class="k">Wrong</div></div><div class="tile"><div class="v num">${h.s}</div><div class="k">Skipped</div></div><div class="tile"><div class="v num">${mmss(h.t)}</div><div class="k">Time taken</div></div></div>`;
+  if(h.c+h.w==0) o+='<p class="muted">No question was answered, so this set is not added to your progress.</p>';
+  const subs=Object.entries(h.sub).filter(([,v])=>v[0]);
+  if(subs.length>1) o+=`<section><h2>By subject</h2>${subs.map(([s,v])=>srow(SUB[s],v[1],v[0])).join('')}</section>`;
+  o+=`<div class="row"><button class="btn pri" data-a="go" data-v="practice">Practice more</button><button class="btn" data-a="go" data-v="progress">See progress</button></div>
+<section><h2>Review every question</h2>${qs.map((q,i)=>`<details class="rv" ${q.sel!=null&&q.sel!=q.a?'open':''}><summary><span class="num">Q${i+1}</span>${q.sel==null?'<span class="chip new">Skipped</span>':q.sel==q.a?'<span class="chip good">Correct</span>':'<span class="chip bad">Wrong</span>'}<span class="muted">${TM[q.t].n}</span></summary><div class="in">${qCard(q,i,true)}</div></details>`).join('')}</section>`;
+  return o}
+const srow=(lb,c,a)=>{const p=a?Math.round(c/a*100):0;return `<div class="srow"><span class="lb">${lb}</span><div class="meter"><i style="width:${p}%"></i></div><span class="pc num">${a?p+'%':'–'}</span><span class="muted num">${c}/${a}</span></div>`};
+function chart(){const hs=S.hist.slice(-15);if(hs.length<2)return '<p class="muted">Finish two sets and your score trend will be drawn here.</p>';
+  const W=600,H=200,L=34,Rr=14,Tp=12,Bt=24,x=i=>L+i*(W-L-Rr)/(hs.length-1),y=v=>Tp+(100-v)*(H-Tp-Bt)/100;
+  const ps=hs.map((h,i)=>[x(i),y(Math.max(0,h.sc/h.mx*100))]),ln=ps.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Score percent for your last ${hs.length} sets">
+${[0,50,100].map(v=>`<line class="grid" x1="${L}" x2="${W-Rr}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}%</text>`).join('')}
+<polygon class="ar" points="${L},${y(0)} ${ln} ${W-Rr},${y(0)}"/><polyline class="ln" points="${ln}"/>
+${ps.map((p,i)=>`<circle class="pt ${i==ps.length-1?'last':''}" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join('')}
+<text x="${L}" y="${H-6}">oldest</text><text x="${W-Rr}" y="${H-6}" text-anchor="end">latest</text></svg>`}
+function streak(){const ds=new Set(S.hist.map(h=>new Date(h.d).toDateString()));let n=0,d=new Date();
+  if(!ds.has(d.toDateString()))d.setDate(d.getDate()-1);
+  while(ds.has(d.toDateString())){n++;d.setDate(d.getDate()-1)}return n}
+function vProgress(){let a=0,c=0;Object.values(S.topic).forEach(s=>{a+=s.a;c+=s.c});
+  let h=hdr()+`<div class="intro"><h1>Your progress</h1></div>`;
+  if(!a) return h+`<div class="card"><h3>Nothing recorded yet</h3><p class="muted">Finish one practice set or mock. Your accuracy, score trend and weak topics will appear here.</p><div class="row"><button class="btn pri" data-a="go" data-v="practice">Start practising</button></div></div>`;
+  const hs=S.hist,recent=hs.slice(-5),older=hs.slice(-10,-5),av=l=>l.length?l.reduce((s,x)=>s+Math.max(0,x.sc/x.mx*100),0)/l.length:null,d=older.length?Math.round(av(recent)-av(older)):null;
+  h+=`<div class="tiles"><div class="tile"><div class="v num">${a}</div><div class="k">Questions answered</div></div><div class="tile"><div class="v num">${Math.round(c/a*100)}%</div><div class="k">Overall accuracy</div></div><div class="tile"><div class="v num">${hs.length}</div><div class="k">Sets finished</div></div><div class="tile"><div class="v num">${streak()}</div><div class="k">Day streak</div></div></div>
+<section class="card"><h2>Score trend</h2>${chart()}${d!=null?`<p class="muted">Your last 5 sets average ${Math.round(av(recent))}%. That is ${d>0?d+' points higher than':d<0?-d+' points lower than':'the same as'} the 5 before.</p>`:''}</section>
+<section><h2>By subject</h2>${Object.keys(SUB).map(s=>{let x=0,y=0;bySub(s).forEach(i=>{const st=S.topic[i];if(st){x+=st.a;y+=st.c}});return srow(SUB[s],y,x)}).join('')}</section>`;
+  const done=T.filter(t=>S.topic[t.id]).sort((p,q)=>acc(S.topic[p.id])-acc(S.topic[q.id]));
+  h+=`<section class="topics"><h2>Topics, weakest first</h2>${done.map(t=>{const st=S.topic[t.id];return `<div class="topic"><div class="nm"><h3>${t.n}</h3><span class="muted num">${st.c}/${st.a} correct · ${acc(st)}%</span></div>${statusChip(st)}<button class="btn quiet" data-a="learn" data-v="${t.id}">Learn</button><button class="btn" data-a="topic" data-v="${t.id}">Practice</button></div>`}).join('')}
+${T.length-done.length?`<p class="muted" style="padding-top:8px">${T.length-done.length} topics not tried yet.</p>`:''}</section>
+<section><h2>Recent sets</h2>${hs.slice(-12).reverse().map(x=>`<div class="hist"><span class="l">${esc(x.l)}</span><span class="num">${+x.sc.toFixed(2)}/${x.mx}</span><span class="muted num">${new Date(x.d).toLocaleDateString(undefined,{day:'numeric',month:'short'})} · ${mmss(x.t)}</span></div>`).join('')}</section>
+<div class="row"><button class="btn quiet" data-a="reset">${resetArm?'Tap again to erase all progress':'Reset progress'}</button></div>`;
+  return h}
+function render(){app.innerHTML=view=='session'?vSession():view=='result'?vResult():view=='mock'?vMock():view=='progress'?vProgress():vPractice()}
+
+/* ---------- learn sheet ---------- */
+const sheet=document.getElementById('learn');
+function openLearn(tid,q){const t=TM[tid];
+  sheet.innerHTML=`<div class="ov" data-a="closeov"><div class="sheet" role="dialog" aria-modal="true" aria-label="Lesson: ${esc(t.n)}">
+<div class="row"><h2 style="flex:1">${t.n}</h2><button class="btn" data-a="close" id="lclose">Close</button></div>
+<div><p class="step">Step 1 · The basics</p><ul>${t.b.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+<div><p class="step">Step 2 · The shortcut</p><ul>${t.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+${q?`<div><p class="step">Step 3 · This question, solved</p><div class="solve"><p><b>${esc(q.q)}</b></p><p>${esc(q.sol)}</p>${ses&&q.sel==null?'':`<p><b>Answer: ${esc(q.opts[q.a])}</b></p>`}</div>${ses&&q.sel==null?'<p class="muted">Now close this and pick the answer yourself.</p>':''}</div>`:''}
+<div class="row">${ses?'':`<button class="btn pri" data-a="topic" data-v="${tid}">Practice this topic</button>`}</div></div></div>`;
+  sheet.hidden=false;document.getElementById('lclose').focus()}
+const closeLearn=()=>{sheet.hidden=true;sheet.innerHTML=''};
+
+/* ---------- actions ---------- */
+const A={
+go(v){resetArm=false;view=v;render();scrollTo(0,0)},
+topic(v){closeLearn();const t=TM[v];start({label:t.n,mode:'practice',parts:[{topics:[v],n:t.g?10:Math.min(10,B[v].length),marks:1,neg:0}]})},
+subj(v){start({label:SUB[v]+' test',mode:'practice',parts:[{topics:bySub(v),n:20,marks:1,neg:0}]})},
+mixed(){start({label:'Mixed practice',mode:'practice',parts:Object.keys(SUB).map(s=>({topics:bySub(s),n:10,marks:1,neg:0}))})},
+mock(v){const m=MOCKS[v];start({label:m.label,mode:'mock',limit:m.limit,parts:m.parts.map(p=>({topics:bySub(p[0]),n:p[1],marks:p[2],neg:p[3]}))})},
+pick(v){const q=ses.qs[ses.i];v=+v;if(ses.mode=='mock')q.sel=q.sel===v?null:v;else if(q.sel==null)q.sel=v;render()},
+next(){if(ses.i<ses.qs.length-1){ses.i++;render();scrollTo(0,0)}},
+prev(){if(ses.i>0){ses.i--;render();scrollTo(0,0)}},
+jump(v){ses.i=+v;render();scrollTo(0,0)},
+mark(){const q=ses.qs[ses.i];q.mark=!q.mark;render()},
+quit(){ses.confirm=true;render();scrollTo(0,0)},
+keep(){ses.confirm=false;render()},
+finish(){finish()},
+learn(v){openLearn(v,null)},
+learnq(v){const q=(ses?ses.qs:res.qs)[+v];openLearn(q.t,q)},
+close(){closeLearn()},
+reset(){if(!resetArm){resetArm=true;render();return}S={topic:{},hist:[],seen:{}};save();resetArm=false;render()}
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+  if(a=='closeov'){if(e.target===b)closeLearn();return}
+  if(A[a])A[a](b.dataset.v)});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!sheet.hidden)closeLearn()});
+render();
+</script>
+
+</body></html>
